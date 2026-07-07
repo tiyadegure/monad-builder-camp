@@ -13,6 +13,13 @@ Web3 暑期实习计划 · Monad Builder Camp（2026.7.6 — 8.7）
 
 ```
 daily/          ← 每日学习记录
+tasks/          ← 按周组织的课程任务完成记录
+  week1/        ← 链上世界、测试网交易、AI 合约开发
+  week2/        ← Builder Track Split
+  week3/        ← Collaboration & Mini Demo
+  week4/        ← Monad Hackathon Week
+  week5/        ← 作品集 Workshop
+contracts/      ← Solidity 合约代码
 notes/          ← 课程笔记、技术要点
 ```
 
