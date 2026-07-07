@@ -1,61 +1,35 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.0;
 
-/**
- * @title MessageBoard - 最简链上留言板
- * @notice 任何人都可以留言，留言永久存储在链上
- */
+/// @title 最简链上留言板
+/// @notice 任何人都可以发留言,留言会永久记录在链上
 contract MessageBoard {
-    // ============ 数据结构 ============
-    
-    /// @notice 单条留言的结构体
     struct Message {
-        address sender;    // 留言者地址
-        string  content;   // 留言内容
-        uint256 timestamp; // 留言时间戳（区块时间）
+        address sender;      // 发送者地址
+        string  content;     // 留言内容
+        uint256 timestamp;   // 时间戳(区块时间)
     }
 
-    // ============ 状态变量 ============
-    
-    /// @notice 所有留言的数组，按发送顺序存储
-    Message[] public messages;
+    // 所有留言,下标即留言序号
+    Message[] private messages;
 
-    // ============ 事件 ============
-    
-    /// @notice 新留言事件，方便前端监听
-    event NewMessage(address indexed sender, string content, uint256 timestamp);
+    // 发留言时抛出事件,便于链下监听
+    event MessagePosted(address indexed sender, string content, uint256 timestamp);
 
-    // ============ 外部函数 ============
-
-    /**
-     * @notice 发送一条留言
-     * @param _content 留言文字内容
-     */
-    function postMessage(string calldata _content) external {
-        // 将留言追加到数组，记录发送者、内容和当前区块时间戳
+    /// @notice 发表一条留言
+    /// @param content 留言内容(任意 string)
+    function postMessage(string calldata content) external {
         messages.push(Message({
             sender:    msg.sender,
-            content:   _content,
+            content:   content,
             timestamp: block.timestamp
         }));
-
-        // 触发事件，方便链下索引
-        emit NewMessage(msg.sender, _content, block.timestamp);
+        emit MessagePosted(msg.sender, content, block.timestamp);
     }
 
-    /**
-     * @notice 读取所有留言
-     * @return 所有留言的数组
-     */
+    /// @notice 读取所有留言
+    /// @return 全部留言数组(地址、内容、时间戳)
     function getMessages() external view returns (Message[] memory) {
         return messages;
-    }
-
-    /**
-     * @notice 查询当前留言总数
-     * @return 留言数量
-     */
-    function messageCount() external view returns (uint256) {
-        return messages.length;
     }
 }
