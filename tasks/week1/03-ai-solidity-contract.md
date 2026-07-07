@@ -70,8 +70,6 @@ contract MessageBoard {
 
 ## 4. 人工修改与判断
 
-我对 AI 生成的初稿做了两处修改：
-
 | 改动 | AI 初稿 | 最终版 | 理由 |
 |------|---------|--------|------|
 | `messages` 可见性 | `public` | `private` | `public` 会自动生成按索引访问的 getter，外部可以直接 `messages(0)` 读单条，但封装不干净。`private` 强制通过 `getMessages()` 读取，接口更统一 |
