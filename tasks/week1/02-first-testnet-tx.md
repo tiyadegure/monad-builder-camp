@@ -6,7 +6,7 @@
 
 ## 区块浏览器
 
-https://testnet.monexplorer.com/tx/0x5f52ac5d15229cc40cbf50c8a7c24e961b5ef8ae45a7a8241947b259df7ae052
+https://testnet.monadvision.com/tx/0x5f52ac5d15229cc40cbf50c8a7c24e961b5ef8ae45a7a8241947b259df7ae052
 
 ## 交易详情
 

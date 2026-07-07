@@ -16,7 +16,7 @@
 
 **Hash：** `0x705c92ad022293ea3090b49e293d1556ee8d2e902757c696f123f37cf13c9612`
 
-**区块浏览器：** https://testnet.monexplorer.com/tx/0x705c92ad022293ea3090b49e293d1556ee8d2e902757c696f123f37cf13c9612
+**区块浏览器：** https://testnet.monadvision.com/tx/0x705c92ad022293ea3090b49e293d1556ee8d2e902757c696f123f37cf13c9612
 
 **部署方式：** forge create（Foundry）
 
@@ -35,7 +35,7 @@ forge create contracts/MessageBoard.sol:MessageBoard \
 
 **交易 Hash：** `0x5cc8bc7b93056fe97417385fbce51fa3dd2d409bd493a6964674f45fd61d00b2`
 
-**浏览器：** https://testnet.monexplorer.com/tx/0x5cc8bc7b93056fe97417385fbce51fa3dd2d409bd493a6964674f45fd61d00b2
+**浏览器：** https://testnet.monadvision.com/tx/0x5cc8bc7b93056fe97417385fbce51fa3dd2d409bd493a6964674f45fd61d00b2
 
 **操作：** 调用 `postMessage("Hello from Monad Builder Camp!")`
 
