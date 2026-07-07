@@ -27,11 +27,6 @@
 - 原因：struct 数组的 ABI 解码不能简单指定返回类型
 - 修复：用 raw call 获取 hex 数据，手动解码字符串内容
 
-**问题 3：浏览器链接打不开**
-- 现象：testnet.monexplorer.com DNS 解析失败
-- 原因：域名不存在，应该用 testnet.monadvision.com
-- 修复：全局替换所有文档中的链接
-
 ---
 
 ### AI 帮我解决了什么
