@@ -30,7 +30,9 @@ Web3 暑期实习计划 · Monad Builder Camp（2026.7.6 — 8.7）
 daily/          ← 每日学习记录
 tasks/          ← 按周组织的课程任务完成记录
   week1/        ← 链上世界、测试网交易、AI 合约开发、Research
-  week2/        ← Research Track（生态研究、产品判断、赛道分析）
+  week2/        ← Research Track
+    general/    ← 职业选择基础任务（通用）
+    research/   ← 研究向任务（MIP Reading 等）
   week3/        ← Collaboration & Mini Demo
   week4/        ← Monad Hackathon Week
   week5/        ← 作品集 Workshop
@@ -48,17 +50,15 @@ notes/          ← 课程笔记、技术要点
 | 4 | Monad Hackathon Week | 可运行产品、Demo Video |
 | 5 | 作品集 Workshop | Portfolio、简历 |
 
-## Week 1 任务完成
+## Week 2 任务完成
 
 | 任务 | 学分 | 文件 |
 |------|------|------|
-| 链上产品 vs 传统产品 | - | [01-chain-vs-web2.md](tasks/week1/01-chain-vs-web2.md) |
-| 首笔测试网交易 | - | [02-first-testnet-tx.md](tasks/week1/02-first-testnet-tx.md) |
-| AI 辅助 Solidity 合约 | 30 | [03-ai-solidity-contract.md](tasks/week1/03-ai-solidity-contract.md) |
-| 部署 Monad 合约 | 30 | [04-deploy-monad-contract.md](tasks/week1/04-deploy-monad-contract.md) |
-| 高频交互场景研究 | 20 | [05-monad-high-freq-scenario.md](tasks/week1/05-monad-high-freq-scenario.md) |
-| Build Log + 阶段总结 | 20 | [06-week1-build-log.md](tasks/week1/06-week1-build-log.md) |
-| Mini Demo 0 | 40 | [07-mini-demo-0.md](tasks/week1/07-mini-demo-0.md) |
+| Role Choice Card | 10 | [general/01-role-choice-card.md](tasks/week2/general/01-role-choice-card.md) |
+| Role Log | 10 | [general/02-role-log.md](tasks/week2/general/02-role-log.md) |
+| AI Collaboration Log | 20 | [general/03-ai-collaboration-log.md](tasks/week2/general/03-ai-collaboration-log.md) |
+| Week 3 Role Statement | 20 | [general/04-week3-role-statement.md](tasks/week2/general/04-week3-role-statement.md) |
+| MIP-9 Reading Card | 20 | [research/05-mip9-reading-card.md](tasks/week2/research/05-mip9-reading-card.md) |
 
 ## Links
 
