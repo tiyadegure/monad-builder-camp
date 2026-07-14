@@ -1,6 +1,5 @@
 # Week 2｜EIP / MIP Reading Card — MIP-9
 
----
 
 ## 提案基本信息
 
