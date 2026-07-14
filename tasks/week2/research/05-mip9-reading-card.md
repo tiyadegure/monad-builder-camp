@@ -1,7 +1,5 @@
 # Week 2｜EIP / MIP Reading Card — MIP-9
 
-> 研究向任务。用自己的语言拆解一个真实的 Monad 治理提案，不复制 AI 摘要，基于 forum.monad.xyz 原文核查。
-
 ---
 
 ## 提案基本信息
