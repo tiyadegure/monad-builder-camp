@@ -49,7 +49,7 @@
 
 | 日期 | 之前的判断 | 更新后的判断 | 触发原因 |
 |------|-----------|-------------|---------|
-|| 7.8 | Monad 就是"更快的 EVM" | 是验证"去中心化应用能做成像普通软件一样快"的假设 | 读 Differences + Best Practices |
+| 7.8 | Monad 就是"更快的 EVM" | 是验证"去中心化应用能做成像普通软件一样快"的假设 | 读 Differences + Best Practices |
 | 7.9 | 区块链产品 = 把数据库换成链 | 核心差异是信任模型，不是存储方式 | BuildAnything 第 5 课 |
 | 7.10 | Research = 写文章 | Research = 帮团队在动手前回答"该往哪走" | 岗位全景图 + Role Choice 思考 |
 | 7.11 | Research = 资料整理 | Research = 技术理解 + 金融分析 + 行业判断的复合能力 | Web3 Builder 三类角色学习 |
