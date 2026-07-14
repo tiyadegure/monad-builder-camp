@@ -19,7 +19,7 @@
 | 资料 | 链接 | 状态 |
 |------|------|------|
 | BuildAnything: 什么是 Monad | https://buildanything.so/zh/tracks/freshman/lessons/what-is-monad | ✅ 已读 |
-| BuildAnything: 10,000 TPS | https://buildanything.so/zh/tracks/freshman/lessons/10000-tps | ❌ 页面故障 |
+| BuildAnything: 10,000 TPS | https://buildanything.so/zh/tracks/freshman/lessons/10000-tps | ✅ 已读 |
 | Web3 实习手册: 行业赛道全览 | https://web3intern.xyz/zh/industry-knowledge/ | ✅ 已读 |
 | Web3 实习手册: 岗位全景图 | https://web3intern.xyz/zh/position-introduction/ | ✅ 已读 |
 
