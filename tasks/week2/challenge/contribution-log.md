@@ -58,7 +58,7 @@ gh pr create --repo nishuzumi/moss --head tiyadegure:docs/chinese-faq --base mai
 
 ---
 
-## 为什么这是有效的 Proof of Work
+##  Proof of Work 有效的原因
 
 1. **真实项目**：Moss 是 Monad 生态真实的 AI Agent 协议框架，不是练习仓库
 2. **真实流程**：Fork → 分支 → 修改 → 提交 → PR，完整开源协作链路
