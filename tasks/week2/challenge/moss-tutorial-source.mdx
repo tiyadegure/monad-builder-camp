@@ -1,19 +1,21 @@
 ---
 title: 'Moss 新手教程：从零跑通第一个链上模拟'
-description: '面向新人的 Moss 上手教程：从环境配置到第一次模拟一笔 Kuru swap，配流程图解与实操步骤。无需私钥、无需钱包。'
+description: '面向新人的 Moss 实战教程：克隆仓库、读懂 discover→load→action→simulate 四步源码、跑通 WMON wrap 与 Kuru swap 两个真实示例、解析链上 Receipt。无需私钥与钱包。'
 pubDate: 2026-07-18
 tags: ['web3', 'monad', 'ai-agent', 'tutorial', 'moss']
 ---
 
 # Moss 新手教程：从零跑通第一个链上模拟
 
-> 这份教程帮你从零把 [Moss](https://github.com/nishuzumi/moss) 跑起来，模拟一笔真实的 Monad 链上交易——**不需要私钥、不需要有钱包、不需要懂 Solidity**。
+> 这份教程带你把 [Moss](https://github.com/nishuzumi/moss) 真正跑起来，用两个官方示例模拟真实的 Monad 链上交易——**不需要私钥、不需要有钱包、不需要懂 Solidity**。所有命令输出均来自真实运行。
 
 ---
 
 ## 一、Moss 在做一件什么事？
 
-先不碰代码，看图理解 Moss 在 Agent 和链之间的位置：
+Moss 是一个把 Monad 链上协议封装成"Agent 可调用的能力（Capability）"的框架。它最大的特点是：**只构建和模拟交易，绝不签名、绝不发送。**
+
+先看它在系统里的位置：
 
 <div class="moss-flow">
   <div class="moss-node agent">AI Agent<br/>意图发起方</div>
@@ -25,20 +27,20 @@ tags: ['web3', 'monad', 'ai-agent', 'tutorial', 'moss']
 
 <p class="moss-caption">Moss 站在 Agent 和链之间：把"人话意图"翻译成"可验证的未签名交易"，模拟后产出 Receipt，但<strong>永远不签名、不发送</strong>。</p>
 
-一句话：**Agent 负责"想做什么"，Moss 负责"翻译成链能懂的话并预演"，钱包负责"真正签字"。** 三者分离，Agent 碰不到你的钱。
+一句话：**Agent 负责"想做什么"，Moss 负责"翻译成链能懂的话并预演"，钱包负责"真正签字"。** 三者分离，Agent 碰不到你的资金。
 
 ---
 
 ## 二、环境准备
 
-Moss 是 TypeScript 项目，需要两个工具：
+Moss 是 TypeScript monorepo，需要两个工具：
 
 | 工具 | 版本 | 检查命令 |
 |------|------|---------|
 | Node.js | ≥ 22 | `node --version` |
 | pnpm | ≥ 11 | `pnpm --version` |
 
-如果没装 pnpm：
+安装 pnpm：
 
 ```bash
 npm install -g pnpm
@@ -46,76 +48,199 @@ npm install -g pnpm
 
 ---
 
-## 三、四步跑通第一个模拟
-
-### 步骤总览
-
-<div class="moss-steps">
-  <div class="moss-step"><span class="moss-step-n">1</span><div><strong>Fork & Clone</strong><br/>拿到代码副本</div></div>
-  <div class="moss-step"><span class="moss-step-n">2</span><div><strong>Install & Build</strong><br/>装依赖、编译</div></div>
-  <div class="moss-step"><span class="moss-step-n">3</span><div><strong>跑示例</strong><br/>wrap / swap 模拟</div></div>
-  <div class="moss-step"><span class="moss-step-n">4</span><div><strong>看 Receipt</strong><br/>读懂模拟证据</div></div>
-</div>
-
-### Step 1：Fork & Clone
+## 三、克隆与安装
 
 ```bash
-# 在 GitHub 上点 Fork，然后 clone 你自己的副本
 git clone https://github.com/<你的用户名>/moss
 cd moss
-```
-
-### Step 2：Install & Build
-
-```bash
 pnpm install
-pnpm build
 ```
 
-先验证工具链没问题（**不需要访问 RPC**）：
+`pnpm install` 会安装所有 workspace 包（core / erc / protocols / simulator / system / mcp-server）并自动链接。
+
+离线自测（**不需要 RPC**，验证工具链）：
 
 ```bash
 pnpm test:offline
 ```
 
-看到测试通过，说明环境 OK。
+看到测试通过，说明环境就绪。
 
-### Step 3：跑第一个示例（WMON wrap）
+---
+
+## 四、核心四步：discover → load → action → simulate
+
+Moss 的所有操作都遵循同一个工作流。我们从最关键的两个示例入手：`examples/simple-flow`。
+
+### 4.1 示例一：WMON wrap
+
+源码 `examples/simple-flow/src/wmon-wrap.ts` 的逻辑非常清晰，四步一一对应：
+
+```ts
+// 1. discover：问"有哪些 wrap 能力？"
+console.log("1. discover", registry.discover({ verb: "wrap" }));
+
+// 2. load：加载意图、风险标签、参数契约
+console.log("2. load", registry.load([{ protocol: "wmon", method: "wrap" }]));
+
+// 3. action：构建未签名交易（Capability 树）
+const capability = await registry.action("wmon", "wrap", ACCOUNT, { amount: "1.5" });
+
+// 4. simulate：在 Monad 主网上模拟执行，产出 Receipt
+const outcome = await simulator.simulate(capability);
+```
+
+真实运行：
 
 ```bash
 pnpm --filter @themoss/example-simple-flow wrap
 ```
 
-这个命令会：发现 WMON，加载参数契约，构建 wrap Capability，模拟，打印有序 Receipt。
+真实输出（节选）：
 
-再跑一个 Kuru swap 示例：
+```
+1. discover [
+  { protocol: 'wmon', method: 'wrap', kind: 'capability',
+    verb: 'wrap', category: 'token', tags: [ 'wrapper' ],
+    summary: 'Wrap native MON into WMON' }
+]
+
+2. load [
+  { protocol: 'wmon', method: 'wrap', kind: 'capability',
+    intent: 'Wrap native MON into WMON', verb: 'wrap',
+    category: 'token', risk: [ 'fundOut' ],
+    tags: [ 'wrapper' ], params: { amount: [Object] } }
+]
+```
+
+注意第 2 步 `load` 比 `discover` 多了两样东西：
+
+- **`risk: ['fundOut']`** —— 这个操作会把资金转出（MON 换成 WMON），Moss 主动标注了风险标签。
+- **`params: { amount: [Object] }`** —— 参数契约（类型与范围），Agent 据此知道要填 `amount`。
+
+第 3 步 `action` 产出真正的未签名交易。看 `children` 里的交易对象：
+
+```
+3. action {
+  kind: 'capability', protocol: 'wmon', method: 'wrap',
+  params: { amount: '1.5' },
+  children: [ { kind: 'transaction', transaction: [Object] } ]
+}
+```
+
+第 4 步 `simulate` 拿到链上 Receipt。关键部分：
+
+```
+4. simulate {
+  "results": [{
+    "transaction": {
+      "from": "0xcccccccccccccccccccccccccccccccccccccccc",
+      "to": "0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A",
+      "data": "0xd0e30db0",
+      "value": "0x14d1120d7b160000"
+    },
+    "reverted": false,
+    "receipt": {
+      "outcome": { "operation": "wrap", "amount": "1500000000000000000" },
+      "text": "WMON wrap: 1500000000000000000 for 0xCcCC...cccC"
+    },
+    "changes": [
+      { "kind": "nativeTransfer", "from": "0xcccc...cccc",
+        "to": "0x3bd359...5433A", "value": "1500000000000000000" }
+    ]
+  }]
+}
+```
+
+解读这笔 Receipt：
+
+- **`to: 0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A`** 是 WMON 合约地址
+- **`data: 0xd0e30db0`** 是 `deposit()` 的 selector
+- **`value: 0x14d1120d7b160000`** = 1.5 MON（十六进制，换算成 wei 即 1.5 × 10¹⁸）
+- **`changes`** 是有序状态变化：原生 MON 从账户转出 1.5 个
+- **`reverted: false`** 表示模拟成功
+
+**重点**：Moss 不返回一句"成功"，而是一份结构化、可验证的证据。你的 Agent（或你本人）应该比对"请求的 1.5 MON wrap"和"Receipt 里的 1.5 × 10¹⁸ wrap"是否一致，一致才交给钱包签名。这就是 Moss 的安全模型——**先验证，后签名**。
+
+### 4.2 示例二：Kuru swap
+
+第二个示例模拟一笔 MON → USDC 的 swap。源码 `examples/simple-flow/src/kuru-swap.ts` 多了一步 **quote（报价）**：
+
+```ts
+// 先报价：询问 1 MON 能换多少 USDC
+const quote = await registry.action("kuru", "quote", ACCOUNT, {
+  tokenIn: NATIVE, tokenOut: USDC_ADDRESS, amountIn: "1",
+});
+console.log("quote", quote.data);
+
+// 再构建 swap 能力
+const capability = await registry.action("kuru", "swap", ACCOUNT, {
+  tokenIn: NATIVE, tokenOut: USDC_ADDRESS, amountIn: "1", slippage: 50,
+});
+```
+
+真实运行：
 
 ```bash
 pnpm --filter @themoss/example-simple-flow swap
 ```
 
-它会请求 MON/USDC 报价，构建一笔 swap，并在当前 Kuru 市场上模拟。
+真实报价输出：
 
-### Step 4：读懂 Receipt
+```
+quote {
+  amountSide: 'amountIn',
+  amountIn: '1',
+  estimatedAmountOut: '0.021519',
+  minimumAmountOut: '0.021411',
+  path: [ 'native', '0x754704Bc059F8C67012fEd69BC8A327a5aafb603' ]
+}
+```
 
-示例最后打印的不是一句"成功"，而是这样的结构：
+含义：用 1 MON 换 USDC，预估得到约 **0.021519 USDC**，按 50 bps 滑点容忍下限 **0.021411 USDC**。路径是 `native → 0x7547...603`（这是 Kuru 上的 USDC 池子地址）。
 
-<div class="moss-receipt">
-  <div class="moss-receipt-title">Receipt（模拟证据）</div>
-    <ul>
-      <li>零 Warning</li>
-      <li>有序 Change：MON 减少 / USDC 增加 / 事件触发</li>
-      <li>结构化 Outcome 与你的请求一致</li>
-    </ul>
-</div>
-
-**重点**：最终检查的是"零 Warning + Receipt 与请求一致"，不是一句成功文案。这就是 Moss 的安全模型——先验证，后签名。
+随后 `simulate` 产出 swap 的 Receipt，里面有完整的未签名 `data`（Kuru 的 `execute` selector `0xffa5210a` 开头的 calldata）和有序的 token 变化记录。`reverted: false` 表示在 Monad 当前主网状态下这笔 swap 可成功执行。
 
 ---
 
-## 四、把它接进你的 AI Agent（MCP）
+## 五、四步流程逐层图解
 
-Moss 提供 MCP server，暴露 4 个工具：`discover` / `load` / `action` / `simulate`。把它加进任意 MCP 客户端：
+把第四节的真实行为抽象成管线，每个阶段输入什么、产出什么：
+
+<div class="moss-pipeline">
+  <div class="moss-stage">
+    <div class="moss-stage-h">① discover</div>
+    <p>问"有哪些协议 / 操作？"</p>
+    <pre class="moss-code">&#123;"verb":"wrap"&#125;</pre>
+    <p class="moss-out">→ 返回坐标：wmon.wrap + 摘要</p>
+  </div>
+  <div class="moss-stage">
+    <div class="moss-stage-h">② load</div>
+    <p>加载意图、风险标签、参数契约</p>
+    <pre class="moss-code">&#123;"items":[&#123;"protocol":"wmon","method":"wrap"&#125;]&#125;</pre>
+    <p class="moss-out">→ Stub：含 risk / params</p>
+  </div>
+  <div class="moss-stage">
+    <div class="moss-stage-h">③ action</div>
+    <p>构建未签名交易 + Capability 树</p>
+    <pre class="moss-code">amount: "1.5"</pre>
+    <p class="moss-out">→ 未签名 tx（不发送）</p>
+  </div>
+  <div class="moss-stage">
+    <div class="moss-stage-h">④ simulate</div>
+    <p>在链上 trace 执行</p>
+    <pre class="moss-code">reverted:false + changes[]</pre>
+    <p class="moss-out">→ 有序 Receipt 证据</p>
+  </div>
+</div>
+
+---
+
+## 六、把它接进你的 AI Agent（MCP）
+
+Moss 内置 MCP server，把上面四步暴露成 4 个标准工具：`discover` / `load` / `action` / `simulate`。任意支持 MCP 的客户端（Claude Desktop、Cursor 等）都能直接调用。
+
+配置（在 MCP 客户端配置里加）：
 
 ```jsonc
 {
@@ -129,81 +254,50 @@ Moss 提供 MCP server，暴露 4 个工具：`discover` / `load` / `action` / `
 }
 ```
 
-接入后，你的 Agent 就能这样工作：
+接入后，Agent 的典型工作流：
 
 <div class="moss-flow">
   <div class="moss-node agent">用户：<br/>"把 1 MON 换成 USDC"</div>
   <div class="moss-arrow">→</div>
-  <div class="moss-node moss">Moss<br/>discover(swap)<br/>load → action<br/>simulate</div>
+  <div class="moss-node moss">Moss<br/>discover → load<br/>action → simulate</div>
   <div class="moss-arrow">→</div>
-  <div class="moss-node chain">Receipt<br/>输出 X USDC<br/>滑点 Y%</div>
+  <div class="moss-node chain">Receipt<br/>约 0.0215 USDC<br/>滑点 50 bps</div>
 </div>
 
-<p class="moss-caption">Agent 拿到 Receipt 后，比对"用户请求"和"模拟结果"是否一致，一致才交钱包签名。</p>
+<p class="moss-caption">Agent 拿到 Receipt 后，比对"用户请求"和"模拟结果"是否一致，一致才交钱包签名。Moss 本身不持有任何签名能力。</p>
 
 ---
 
-## 五、四步流程逐层图解
+## 七、想参与开源贡献？从这里开始
 
-这是 Moss 核心工作流的详细版，建议对照代码看：
+Moss 欢迎文档和协议包贡献。新人最友好的三个入口：
 
-<div class="moss-pipeline">
-  <div class="moss-stage">
-    <div class="moss-stage-h">① discover</div>
-    <p>问"有哪些协议 / 操作？"</p>
-    <pre class="moss-code">&#123;"verb":"swap"&#125;</pre>
-    <p class="moss-out">→ 返回坐标：kuru.swap</p>
-  </div>
-  <div class="moss-stage">
-    <div class="moss-stage-h">② load</div>
-    <p>加载意图、风险标签、参数契约</p>
-    <pre class="moss-code">&#123;"items":[&#123;"protocol":"kuru","method":"swap"&#125;]&#125;</pre>
-    <p class="moss-out">→ Stub：参数类型与范围</p>
-  </div>
-  <div class="moss-stage">
-    <div class="moss-stage-h">③ action</div>
-    <p>构建未签名交易 + Capability 树</p>
-    <pre class="moss-code">tokenIn, amountIn, slippage</pre>
-    <p class="moss-out">→ 未签名 tx（不发送）</p>
-  </div>
-  <div class="moss-stage">
-    <div class="moss-stage-h">④ simulate</div>
-    <p>debug_traceCall 跑交易</p>
-    <pre class="moss-code">记录 Event + MON 转账</pre>
-    <p class="moss-out">→ 有序 Receipt 证据</p>
-  </div>
-</div>
-
----
-
-## 六、想参与开源贡献？从这里开始
-
-Moss 欢迎文档和协议包贡献。新人最友好的入口：
-
-1. **写文档 / FAQ**：中文社区正在建设，仓库 Issue 区会征集文档需求
-2. **接新协议**：读 `docs/protocol-onboarding.md`，照着 Kuru 的例子写一个 `protocol-*`
+1. **写文档 / FAQ**：仓库 Issue 区常征集文档需求，中文资料尤其稀缺
+2. **接新协议**：读 `docs/protocol-onboarding.md`，照着 `protocol-kuru` 的例子写一个 `protocol-*`
 3. **提交 PR**：Fork 自己的副本 → 开分支 → 改 → `gh pr create`
 
-贡献流程与本文"四步跑通"完全独立，你可以先跑通示例、理解项目，再决定从哪里切入。
+贡献流程与"跑通示例"相互独立：你可以先跑通、理解项目，再决定从哪里切入。
 
 ---
 
-## 七、常见坑
+## 八、常见坑
 
 | 问题 | 解决 |
 |------|------|
 | `pnpm: command not found` | 先 `npm install -g pnpm` |
-| `build` 报错说找不到类型 | 必须先 `pnpm build` 再 `typecheck`（dist 里有生成声明） |
-| RPC 连不上 | 示例只读主网状态做模拟，不需要私钥；检查 `MOSS_RPC_URL` |
-| 想发真实交易 | Moss 不支持——它只模拟。签名发送由你的钱包层做 |
+| `pnpm install` 后示例找不到包 | 必须在仓库根目录用 workspace 安装，不要在 `examples/` 里单独装 |
+| RPC 连不上 | 示例只读主网状态做模拟，不需要私钥；检查 `MOSS_RPC_URL` 是否可达 |
+| 想发真实交易 | Moss 不支持——它只模拟。签名发送由你的钱包层完成 |
+| `simulate` 报 `reverted: true` | 说明在当前链上状态这笔交易会失败，不要签名；先排查参数（滑点、金额、地址） |
 
 ---
 
-## 八、下一步学什么
+## 九、下一步学什么
 
-- 读 [Getting Started](https://github.com/nishuzumi/moss/blob/main/docs/getting-started.md) 逐层重建流程
-- 读 [MCP Tools](https://github.com/nishuzumi/moss/blob/main/docs/mcp-tools.md) 理解 4 个工具的输入输出
-- 读 [Protocol Onboarding](https://github.com/nishuzumi/moss/blob/main/docs/protocol-onboarding.md) 写自己的协议包
+- 读 [Getting Started](https://github.com/nishuzumi/moss/blob/main/docs/getting-started.md) 逐层重建四步流程
+- 读 [MCP Tools](https://github.com/nishuzumi/moss/blob/main/docs/mcp-tools.md) 理解 4 个工具的输入输出契约
+- 读 [Protocol Onboarding](https://github.com/nishuzumi/moss/blob/main/docs/protocol-onboarding.md) 自己写一个协议包
+- 读 `examples/simple-flow/src/wmon-wrap.ts` 和 `kuru-swap.ts` 两个文件，是理解 Moss 最直观的入口
 
 ---
 
@@ -213,7 +307,8 @@ Moss 欢迎文档和协议包贡献。新人最友好的入口：
 
 ## 参考链接
 
-- Moss 仓库: https://github.com/nishuzumi/moss
-- Getting Started: https://github.com/nishuzumi/moss/blob/main/docs/getting-started.md
-- MCP Tools: https://github.com/nishuzumi/moss/blob/main/docs/mcp-tools.md
-- Protocol Onboarding: https://github.com/nishuzumi/moss/blob/main/docs/protocol-onboarding.md
+- Moss 仓库：https://github.com/nishuzumi/moss
+- Getting Started：https://github.com/nishuzumi/moss/blob/main/docs/getting-started.md
+- MCP Tools：https://github.com/nishuzumi/moss/blob/main/docs/mcp-tools.md
+- Protocol Onboarding：https://github.com/nishuzumi/moss/blob/main/docs/protocol-onboarding.md
+- 示例源码：examples/simple-flow/src/wmon-wrap.ts · kuru-swap.ts
