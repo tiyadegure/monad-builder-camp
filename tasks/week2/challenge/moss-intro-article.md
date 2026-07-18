@@ -84,9 +84,14 @@ Moss 目前是未经审计的 alpha 软件，不适合生产资金。但作为 M
 
 ---
 
-## 参考链接
+## 文章发布
 
-- Moss GitHub: https://github.com/nishuzumi/moss
-- 我的 PR #88: https://github.com/nishuzumi/moss/pull/88
-- Issue #77 (FAQ 需求): https://github.com/nishuzumi/moss/issues/77
-- MCP Tools 文档: https://github.com/nishuzumi/moss/blob/main/docs/mcp-tools.md
+**博客链接：** https://degure-blog.pages.dev/blog/moss-intro/
+
+**文章主题（提交用，50-100 字）：**
+> 本文介绍 Monad 生态的 AI Agent 协议框架 Moss，解析它如何通过"只模拟不签名"的设计在 Agent 与链之间建立信任边界，并结合我个人提交中文 FAQ（PR #88）的开源实践，说明为什么研究者也能有效参与 Web3 开源。
+
+## 发布记录
+
+- 2026-07-18：文章转成 `.mdx` 写入个人 blog（Astro + Cloudflare Pages），构建并部署成功
+- 仓库路径：`degure-blog/src/content/blog/moss-intro.mdx`
