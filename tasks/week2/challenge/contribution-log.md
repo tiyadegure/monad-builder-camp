@@ -1,8 +1,5 @@
 # Week 2 | Challenge | Open Source Contribution Log (Proof of Work)
 
-> 任务目标：留下真实、可验证的开源贡献记录，作为可公开展示的 Proof of Work。
-
----
 
 ## 贡献概览
 
