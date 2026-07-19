@@ -1,4 +1,4 @@
-# Week 2 | Space / 小型活动策划案：用 AI Agent 框架在 Monad 上写协议 Adapter
+# Space / 小型活动策划案：用 AI Agent 框架在 Monad 上写协议 Adapter
 
 ## 活动主题
 
@@ -45,9 +45,3 @@
 - aPriori adapter PR #104：https://github.com/nishuzumi/moss/pull/104
 - 技术赛道证据（真实测试 / 主网 e2e / 链上验证）：`../tech-track/`
 - 运行截图：../tech-track/assets/run-evidence.png
-
-## 提交信息
-
-- 策划案：tasks/week2/ops/space-plan.md
-- 学习仓库：https://github.com/tiyadegure/monad-builder-camp
-- GitHub 主页：https://github.com/tiyadegure

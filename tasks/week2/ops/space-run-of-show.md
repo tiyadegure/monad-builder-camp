@@ -1,8 +1,4 @@
-# Week 2 | Space 内容设计（Run of Show）
-
-学分：20 · 运营赛道 · 承接任务 10 的 Space 主题
-
-> 重点：内容清晰、有节奏。不写宣传，只设计活动当天的流程与互动。
+# Space 内容设计（Run of Show）
 
 ## 活动标题
 
@@ -54,10 +50,3 @@
 3. **🛠 认领一个小任务**：在 Moss Issues 选一个文档/FAQ 或新协议 adapter，沿"MVP→完善"节奏提交你的第一笔 PR；遇到链上验证问题，去 `monad-builder-camp` 的 `tech-track/` 看本次案例怎么查的
 
 配套留档：学习仓库 `tasks/week2/tech-track/`（真实测试 / 主网 e2e / 链上验证证据）作为新人自学手册。
-
-## 提交信息
-
-- 内容设计：tasks/week2/ops/space-run-of-show.md
-- 关联主题策划（任务 10）：tasks/week2/ops/space-plan.md
-- 真实案例来源：https://github.com/nishuzumi/moss/pull/104
-- 学习仓库：https://github.com/tiyadegure/monad-builder-camp
