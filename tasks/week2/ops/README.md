@@ -11,6 +11,7 @@
 | 任务 | 学分 | 状态 | 产出 |
 |------|------|------|------|
 | Space / 小型活动策划案 | 20 | 已完成 | [space-plan.md](./space-plan.md) |
+| Space 内容设计（Run of Show） | 20 | 已完成 | [space-run-of-show.md](./space-run-of-show.md) |
 
 ## 关联
 
