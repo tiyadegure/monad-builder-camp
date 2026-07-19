@@ -12,13 +12,14 @@
 | Prototype Evidence | 40 | 已完成 | [prototype-evidence.md](./prototype-evidence.md) |
 | Dev Portfolio Pack | 50 | 已完成 | [dev-portfolio-pack.md](./dev-portfolio-pack.md) |
 
-## 主线
+## 主线（MVP → 完善）
 
-四个任务围绕同一个最小原型展开：**AI 质押 Agent**（用户说 "Stake X MON into
+四个任务围绕同一个最小原型：**AI 质押 Agent**（用户说 "Stake X MON into
 aPriori"，Agent 通过 Moss 框架构建指向 aPriori aprMON 金库的正确交易并解析
-Receipt）。核心交付物是 `@themoss/protocol-apriori` adapter（PR #104），把 aPriori
-的真实合约函数（`deposit` / `requestRedeem` / `redeem`）封装为 Agent 可调用的
-Capability。
+Receipt）。核心交付物是 `@themoss/protocol-apriori` adapter（PR #104）。
+
+- **MVP**：单 stake Capability 跑通 discover/load/action 架构闭环
+- **完善**：按 aPriori 官方文档补全 stake/unstake/claim 三步骤 + 链上验证三函数 selector + 4 单测 + 主网 e2e
 
 ## 关联
 
