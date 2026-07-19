@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>aPriori 质押 Agent 原型 · 技术赛道证据</title>
+<style>
+  :root{
+    --ink:#1B365D; --ink-soft:#3a5a8c; --parch:#f4efe2; --line:#d9cfb8; --accent:#9a7b3f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--parch);color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Songti SC",serif;
+    line-height:1.7;font-size:16px}
+  .wrap{max-width:880px;margin:0 auto;padding:48px 28px 80px}
+  h1{font-size:30px;letter-spacing:.5px;border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:6px}
+  h2{font-size:21px;color:var(--ink);margin-top:42px;border-left:4px solid var(--accent);padding-left:12px}
+  h3{font-size:17px;color:var(--ink-soft);margin-top:26px}
+  .sub{color:var(--ink-soft);font-style:italic;margin-top:0}
+  a{color:var(--ink);text-decoration:underline;text-underline-offset:2px}
+  code{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13px;background:#ece4d2;
+    padding:1px 5px;border-radius:3px;color:#5a3d12}
+  pre{background:#2b2b2b;color:#e8e0cc;padding:16px 18px;border-radius:6px;overflow:auto;
+    font-size:12.5px;line-height:1.5;border:1px solid var(--line)}
+  pre code{background:none;color:inherit;padding:0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+  th{background:#e9e0cc;color:var(--ink)}
+  .card{border:1px solid var(--line);background:#fbf7ec;padding:16px 20px;border-radius:6px;margin:14px 0}
+  .tag{display:inline-block;background:var(--ink);color:var(--parch);font-size:12px;
+    padding:2px 10px;border-radius:20px;margin-right:6px;font-family:Georgia,serif}
+  .ok{color:#2f6b3a;font-weight:600}
+  .warn{color:#9a5b1e;font-weight:600}
+  .muted{color:var(--ink-soft)}
+  ul{margin:8px 0 8px 0}
+  li{margin:4px 0}
+  hr{border:none;border-top:1px solid var(--line);margin:34px 0}
+  .foot{margin-top:50px;font-size:13px;color:var(--ink-soft);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>aPriori 质押 Agent 原型</h1>
+  <p class="sub">Week 2 技术赛道证据页 · Moss <code>@themoss/protocol-apriori</code> adapter · Monad</p>
+
+  <div class="card">
+    <span class="tag">Dev Plan 20</span><span class="tag">文档到骨架 30</span>
+    <span class="tag">Prototype Evidence 40</span><span class="tag">Portfolio Pack 50</span>
+    <p style="margin:10px 0 0">
+      一个最小 AI 质押 Agent：用户说 "Stake X MON into aPriori"，Agent 通过 Moss 框架自动
+      <code>discover → load → action → simulate</code>，构建指向 aPriori aprMON 金库的正确交易并解析 Receipt。
+    </p>
+  </div>
+
+  <h2>核心交付物</h2>
+  <ul>
+    <li><span class="ok">PR #104（OPEN，非 draft，head ce7161ce）</span> —
+      <a href="https://github.com/nishuzumi/moss/pull/104">github.com/nishuzumi/moss/pull/104</a></li>
+    <li>GitHub 主页 — <a href="https://github.com/tiyadegure">github.com/tiyadegure</a></li>
+    <li>学习仓库 — <a href="https://github.com/tiyadegure/monad-builder-camp">github.com/tiyadegure/monad-builder-camp</a></li>
+  </ul>
+
+  <h2>MVP → 完善 时间线</h2>
+  <table>
+    <tr><th>阶段</th><th>做了什么</th><th>状态</th></tr>
+    <tr><td>MVP</td><td>创建包骨架；单 <code>stake</code> Capability；discover/load/action 跑通</td><td>架构闭环</td></tr>
+    <tr><td>踩坑</td><td>主网 <code>deposit</code> revert；链上 decode 发现 aprMON 是 EIP-7702 委托合约</td><td>定位根因</td></tr>
+    <tr><td>完善</td><td>按官方文档改 <code>deposit/requestRedeem/redeem</code>；扩展 stake/unstake/claim 三步骤</td><td><span class="ok">完成</span></td></tr>
+    <tr><td>验证</td><td>链上验证三 selector；4 单测；主网 e2e 构建正确交易</td><td><span class="ok">通过</span></td></tr>
+  </table>
+
+  <h2>真实运行证据</h2>
+
+  <h3>单元测试（<code>pnpm test</code>，2026-07-19 实跑）</h3>
+  <pre><code>$ vitest run
+ RUN  v3.2.6 /tmp/moss/packages/protocols/apriori
+ ✓ test/adapter.test.ts (4 tests) 81ms
+ Test Files  1 passed (1)
+      Tests  4 passed (4)</code></pre>
+
+  <h3>主网 e2e 构建的交易（selector 与官方文档一致）</h3>
+  <pre><code>[stake]   to: 0x0c65a0bc65a5d819235b71f554d210d3f80e0852  selector: 0x6e553f65  value: 0xde0b6b3a7640000
+[unstake] to: 0x0c65a0bc65a5d819235b71f554d210d3f80e0852  selector: 0x107703ab  value: 0x0
+[claim]   to: 0x0c65a0bc65a5d819235b71f554d210d3f80e0852  selector: 0x492e47d2  value: 0x0</code></pre>
+
+  <h3>链上验证（替代交易 hash：走"只模拟不签名"路径）</h3>
+  <ul>
+    <li>aprMON <code>0x0c65a0bc65a5d819235b71f554d210d3f80e0852</code>：EIP-7702 委托合约，逻辑在 <code>0x29fcb43b46531bca003ddc8fcb67ffe91900c762</code></li>
+    <li>三函数 selector 经 <code>eth_call</code> 确认存在：<code>deposit 0x6e553f65</code> / <code>requestRedeem 0x107703ab</code> / <code>redeem 0x492e47d2</code></li>
+  </ul>
+
+  <h2>关键代码（真实片段）</h2>
+  <pre><code>// src/abis/apriori.ts —— 链上验证注释（ADR 0007）
+// aprMON is an EIP-7702 delegated token; logic in 0x29fcb43b46531bca003ddc8fcb67ffe91900c762
+// deposit 0x6e553f65 / requestRedeem 0x107703ab / redeem 0x492e47d2
+
+// src/adapter.ts —— stake Capability（payable + msg.value）
+@Capability({ verb: "stake", params: stakeParams, receipt: "stakeReceipt", risk: ["fundOut","priceImpact"] })
+async stake(params) {
+  const amountBase = parseUnits(params.amount, 18);
+  return [this.aprMon.deposit([amountBase, params.receiver], { value: amountBase })];
+}</code></pre>
+
+  <h2>Known Issues（诚实标注）</h2>
+  <ul>
+    <li><span class="warn">主网 stake 模拟 revert</span>：<code>deposit(uint256,address)</code> 用真实余额账户 + value 调用仍 revert。函数存在（selector 验证），卡业务逻辑层（receiver 形式 / 最小量 / 白名单待确认）。不影响交易构建正确性。</li>
+    <li><span class="warn">redeem 数组参数</span>：Moss 当前 param 类型无数组变体，<code>claim</code> 暂只接受单 <code>requestId</code>，批量领取待框架支持后补。</li>
+    <li><span class="warn">unstake/claim 主网 simulate</span>：requestRedeem/redeem 未端到端验证（需真实 aprMON 持仓与已过 unbonding epoch 的 request）。</li>
+  </ul>
+
+  <h2>Week 3 可承担角色</h2>
+  <ul>
+    <li><b>Protocol Adapter 开发</b>：熟悉 Moss Protocol/Capability/Receipt 抽象与 ADR 0007，可继续为 Monad 生态协议写 adapter。</li>
+    <li><b>链上合约探查</b>：viem + 4byte.directory + bytecode decode 定位真实合约函数（EIP-7702 经验可复用）。</li>
+    <li><b>测试与证据整理</b>：Registry/parseReceipt 单测、主网 e2e、Prototype Evidence。</li>
+  </ul>
+
+  <hr/>
+  <div class="foot">
+    证据同源：<a href="https://github.com/tiyadegure/monad-builder-camp/tree/main/tasks/week2/tech-track">monad-builder-camp / tasks/week2/tech-track</a>
+    · 代码：<a href="https://github.com/nishuzumi/moss/pull/104">PR #104</a>
+  </div>
+
+</div>
+</body>
+</html>
