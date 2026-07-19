@@ -1,6 +1,5 @@
 # Week 2 | Space / 小型活动策划案：用 AI Agent 框架在 Monad 上写协议 Adapter
 
-
 ## 活动主题
 
 **「不写一行合约，也能让 AI 帮你质押：用 Moss 在 Monad 上接一个协议」**
