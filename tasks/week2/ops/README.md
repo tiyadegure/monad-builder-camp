@@ -10,6 +10,7 @@
 
 - [Space / 小型活动策划案](./space-plan.md)
 - [Space 内容设计（Run of Show）](./space-run-of-show.md)
+- [活动执行预案](./space-exec-plan.md)
 
 ## 关联
 
