@@ -48,6 +48,6 @@
 
 ## 提交信息（用于平台）
 
-- 计划文档：tasks/week2/challenge/ai-assisted-dev-plan.md
+- 计划文档：tasks/week2/tech-track/ai-assisted-dev-plan.md
 - 关联 PR：https://github.com/nishuzumi/moss/pull/104
 - GitHub 主页：https://github.com/tiyadegure
