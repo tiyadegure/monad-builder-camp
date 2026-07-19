@@ -27,6 +27,38 @@
 [claim]   to: 0x0c65a0bc65a5d819235b71f554d210d3f80e0852  selector: 0x492e47d2  value: 0x0
 ```
 
+### 用户动作流程图（完整质押生命周期）
+
+```
+用户                     AI Agent (Moss)                    aPriori 链上
+ │                            │                                │
+ │ "Stake 1 MON              │                                │
+ │  into aPriori"            │                                │
+ ├──────────────────────────>│                                │
+ │                            │ discover(verb=stake)          │
+ │                            │ load(apriori protocol)        │
+ │                            │ action(amount=1,receiver)     │
+ │                            │  ├─ to: 0x0c65…aprMON         │
+ │                            │  ├─ data: 0x6e553f65(deposit) │
+ │                            │  └─ value: 1 MON             │
+ │                            │ simulate() → reverted? check │
+ │                            │ parseReceipt(Deposit event)  │
+ │<──────────────────────────┤                                │
+ │ 返回交易草稿 + Receipt：    │                                │
+ │ "你将获得 ≈0.98 aprMON"    │                                │
+ │                            │                                │
+ │ 用户签名广播 ──────────────────────────────────────────────>│ deposit()
+ │                            │                                │ mint aprMON
+ │                            │                                │
+ │  (退出时，异步两步)         │                                │
+ │ 用户 "Unstake 1 aprMON" ──>│ unstake → requestRedeem()     │ 入队退出请求
+ │                            │                                │ (等 unbonding epoch)
+ │ 用户 "Claim" ─────────────>│ claim → redeem(requestId)     │ 领取 MON
+```
+
+说明：Agent 只负责 discover→load→action→simulate 与 Receipt 解析，**不碰私钥**；
+签名广播由用户钱包完成（Moss "先验证后签名" 安全模型）。
+
 ## 我需要读哪 1–3 个文档？
 
 1. **Moss `docs/protocol-onboarding.md`** + **ADR 0007** —— adapter 编写规范、固定地址必须链上验证（explorer provenance 注释）

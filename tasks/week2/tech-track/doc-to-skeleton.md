@@ -77,6 +77,48 @@ async claim(p)   { return [this.aprMon.redeem([[BigInt(p.requestId)], p.receiver
 
 **5. 测试对齐**：stake 测试补 `receiver`；Deposit 事件 Receipt 字段由 `staked` 改名 `assets` 对齐 ABI；补 unstake/claim 构建与解析测试。
 
+### AI 生成的初始骨架 vs 最终代码（差异 diff）
+
+下面是 AI 初始骨架（MVP，错误假设）与我手动修正后的最终代码（完善）的关键差异。
+
+**ABI：`stake()` 单参 → 三函数 + 事件**
+```diff
+- // AI 初始（MVP，错误）
+- export const AprMonAbi = parseAbi([
+-   "function stake() payable returns (uint256 shares)",
+- ]);
++ // 最终（完善，链上验证）
++ export const AprMonAbi = parseAbi([
++   "function deposit(uint256 assets, address receiver) payable returns (uint256 shares)",
++   "function requestRedeem(uint256 shares, address receiver) returns (uint256 requestId)",
++   "function redeem(uint256[] requestIds, address receiver) returns (uint256 assets)",
++   "event Deposit(address indexed sender, address indexed owner, uint256 assets, uint256 shares)",
++   "event RequestRedeem(address indexed sender, address indexed owner, uint256 shares, uint256 requestId)",
++   "event Redeem(address indexed sender, address indexed owner, uint256[] requestIds, uint256 assets)",
++ ]);
+```
+
+**Capability：单 stake → 三步骤映射**
+```diff
+- // AI 初始（MVP）
+- @Capability({ verb: "stake", params: { amount }, receipt: "stakeReceipt", risk: ["fundOut"] })
+- async stake(params) {
+-   const amountBase = parseUnits(params.amount, 18);
+-   return [this.aprMon.stake([], { value: amountBase })];   // ❌ stake() 不存在
+- }
++ // 最终（完善）：deposit→stake, requestRedeem→unstake, redeem→claim
++ @Capability({ verb: "stake", params: stakeParams, receipt: "stakeReceipt", risk: ["fundOut","priceImpact"] })
++ async stake(p) { return [this.aprMon.deposit([parseUnits(p.amount,18), p.receiver], { value: parseUnits(p.amount,18) })]; }
++
++ @Capability({ verb: "unstake", params: unstakeParams, receipt: "unstakeReceipt", risk: ["priceImpact"] })
++ async unstake(p) { return [this.aprMon.requestRedeem([parseUnits(p.shares,18), p.receiver])]; }
++
++ @Capability({ verb: "claim", params: claimParams, receipt: "claimReceipt", risk: ["fundOut"] })
++ async claim(p) { return [this.aprMon.redeem([[BigInt(p.requestId)], p.receiver])]; }
+```
+
+**差异根因**：AI 初始按"标准 ERC4626 `stake()`"假设，主网 simulate revert；链上 decode 确认 aprMON 是 EIP-7702 委托合约，最终按 aPriori 官方文档改为 payable `deposit(uint256,address)` + 异步 `requestRedeem`/`redeem`。
+
 ## 当前是否跑通
 
 **部分跑通。**
