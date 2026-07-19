@@ -40,10 +40,24 @@
 
 ## 3. Week 3 你能继续承担什么开发角色
 
-- **Protocol Adapter 开发**：已熟悉 Moss 的 Protocol/Capability/Receipt 抽象与 ADR 0007 链上验证规范，可继续为 Monad 生态协议（Kuru 之外、其他 LST/DEX）写 adapter。
-- **链上合约探查**：能用 viem + 4byte.directory + bytecode decode 定位真实合约函数（本次踩坑 EIP-7702 委托合约的经验可直接复用）。
-- **测试与证据整理**：写 Registry/parseReceipt 单测、主网 e2e 验证、整理 Prototype Evidence / Known Issues。
-- **文档**：中文文档/FAQ（已提 PR #88），可继续补 Moss 中文 onboarding。
+按"想做 / 做到哪 / 能承担"拆细，Week 3 可独立认领以下角色：
+
+**A. Protocol Adapter 开发者（主力）**
+- 已交付 aPriori adapter（PR #104），熟悉 Moss 的 `@Protocol` / `@Capability` / `@Receipt` 抽象与 ADR 0007 链上验证规范
+- Week 3 可继续为 Monad 生态未接入的协议写 adapter（如其他 LST、DEX、借贷），每个按"MVP 单 Capability → 完善多步骤 + 链上验证"推进
+
+**B. 链上合约探查（支撑角色）**
+- 已踩坑并解决 EIP-7702 委托合约的探查（decode bytecode + 4byte.directory + eth_call 定位真实函数）
+- 可为团队其他 adapter 做"合约函数签名确认"前置，减少主网 simulate revert 的卡点
+
+**C. 测试与证据整理（质量保障）**
+- 写 Registry / parseReceipt 单测、主网 e2e 验证脚本
+- 整理 Prototype Evidence / Known Issues / changeset，确保 PR 通过 CI 与 review
+
+**D. 中文文档（生态拓展）**
+- 已提 Moss 中文 FAQ（PR #88），可继续补中文 onboarding / adapter 编写指南，降低非英语贡献者门槛
+
+**认领优先级建议**：A > C > B > D（以代码贡献为主，文档为辅）。
 
 ---
 
