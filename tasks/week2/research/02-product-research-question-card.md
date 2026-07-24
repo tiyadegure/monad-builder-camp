@@ -47,15 +47,24 @@ Lending
 5. Morpho GitHub — https://github.com/morpho-org/morpho
 6. Aave Governance — https://governance.aave.com （补充对照）
 
-## 初始假设
+## 初始假设（查证后）
 
-我现在猜测：
-- Morpho 更偏“供给端优化”（把资金利用率打满），Aave 更偏“全市场流动性 + 稳定控制”。
-- Morpho 的风险参数可能更依赖动态调整，Aave 的风险框架更静态、可预期。
-- 两者能共存的原因不是“谁更好”，而是服务了不同风险/效率偏好的用户。
+**假设 1：Morpho 更偏“供给端优化”，Aave 更偏“全市场流动性 + 稳定控制”。**
+→ **部分确认。** Morpho 确实把资金利用率放在核心位置，但它不只是“优化现有 pool”，而是把自己定位成一个更底层的 lending primitive：允许任何人无许可创建 immutable market（Blue 可变利率 / Midnight 固定利率）。Aave 则是 curated 市场，资产和风险参数由治理控制。 Morpho 的“优化”体现在市场创建层，Aave 的“稳定”体现在治理统一管控。
 
-## 不确定点
+**假设 2：Morpho 的风险参数更依赖动态调整，Aave 更静态。**
+→ **反转。** 实际更接近相反：Morpho 的 Blue/Midnight 市场一旦部署是 immutable 的，参数不可后改；Aave 的 reserve factor、LTV、liquidation threshold 等可通过 Pool Configurator 和治理动态调整。 Morpho 把“不可篡改”当作风险控制手段，Aave 把“可调参数”当作风控手段。
 
-- Morpho 的利率模型到底是完全复用了底层（Aave/Compound）还是自研了叠加层？
-- 在极端行情下，Morpho 的清算路径是否真的比 Aave 更优/更差？
-- “为什么能共存”究竟是用户分层，还是流动性网络效应导致的切换成本？
+**假设 3：两者共存不是因为“谁更好”，而是服务不同偏好的用户。**
+→ **确认，但需要补充。** 用户分层是原因之一，但更核心的是产品形态不同：Morpho 同时提供可变利率（Blue）和固定利率（Midnight），且允许无许可创建市场；Aave 只提供可变利率、资产由治理 curation。切换成本存在，但不是共存的主因——主因是它们满足了不同的市场需求（长尾/定制化 vs 流动性深度/安全性）。
+
+## 不确定点（查证后）
+
+1. **Morpho 的利率模型到底完全复用底层，还是自研了叠加层？**
+   → **已部分确认。** Morpho Blue 的利率模型文档明确写了“Dynamic interest rates based on market conditions”，但具体曲线函数是否与 Aave 的 same utilization curve 一致，还需要看 Interest Rate Model 页面的数学定义。目前可确认：它不是简单复用 Aave 的利率策略合约，而是自研了一套模型（文档单独列章）。
+
+2. **极端行情下 Morpho 的清算路径是否真的比 Aave 更优/更差？**
+   → **仍未解。** 两边文档都确认有基于 LTV 的清算机制，但 Morpho 的清算人是开放竞争还是专户？清算激励、延迟、坏账处理（bad debt）是否有差异，文档未直接对比。需要看具体市场参数或第三方研究。
+
+3. **“为什么能共存”究竟是用户分层，还是流动性网络效应导致的切换成本？**
+   → **已收敛为“产品形态差异优先”。** 用户分层是结果，不是原因。真正的原因是 Morpho 提供了 Aave 不做的两件事：固定利率市场 + 无许可创建市场。只要这两件事有真实需求，两者就会继续共存，与网络效应无关。
