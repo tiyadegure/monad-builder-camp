@@ -12,7 +12,7 @@ Hyperliquid（HYPE）
 ## 核心机制
 Hyperliquid 不是 EVM L2，而是一条**独立的 L1**，共识、执行、结算全自研：
 
-- ** consensus**：HotStuff 风格 BFT + PoS，验证者质押 HYPE，出块时间 ~2s。
+- **consensus**：HotStuff 风格 BFT + PoS，验证者质押 HYPE，出块时间 ~2s。
 - **execution**：Rust 实现的状态机，处理 orderbook、match、settlement，不是 EVM bytecode。
 - **DLOB（Dual Limit Order Book）**：同池同价合 perps 和 spot，maker 挂单进入同一簿记，由 L1 统一撮合，没有外包做市商。
 - **cross-margin**：账户内 perps + spot + 杠杆共用同一保证金池，不是按市场隔离。
