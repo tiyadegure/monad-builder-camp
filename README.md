@@ -93,6 +93,9 @@ notes/          ← 课程笔记、技术要点
 - Day 16 CLI 原型 + Week 3 Dev README → `daily/2026-07-21.md`
 - Day 17 Co-build 交付链骨架 + Product Brief + Decision Log + Stand-up → `daily/2026-07-22.md`
 - Day 18 PR #104 修订版收口 + Hackathon 交付检查 → `daily/2026-07-23.md`
+- Day 19 Week 4 Hackathon 预演 + 交付形式确认 → `daily/2026-07-24.md`
+- Day 20 Hackathon 启动 + MCP server 路线确定 → `daily/2026-07-27.md`
+- Day 21 MCP server 原型跑通 + Demo 脚本初稿 → `daily/2026-07-28.md`
 
 ## Links
 
