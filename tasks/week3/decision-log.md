@@ -53,7 +53,6 @@
 - 多次迭代 Week 3 docs：team-formation-card → problem-mini-demo-card → problem-validation → brainstorm-meeting → team-plan
 
 ## 当前遇到的问题
-- Hermes 内建 Notion MCP 工具返回 401（token 无效），但 REST API 正常；需后续排查 Hermes MCP 工具链的 token 传递
 - Kuru/Perpl CLOB SDK 接入尚未验证，Week 4 需要确认是否直接可用
 - 需要主网清算事件数据验证“真实空白”假设
 
