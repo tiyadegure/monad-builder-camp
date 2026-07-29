@@ -8,7 +8,7 @@ Monad Agent Kit
 | 成员 | 角色 | 负责 |
 |------|------|------|
 | TiyaDegurechaff | Researcher | 协议研究、用户场景分析、竞品叙事、数据验证 |
-| Dev | Dev | Moss adapter 开发、链上验证、MCP/CLI 原型、可演示交付 |
+| builder | Dev | Moss adapter 开发、链上验证、MCP/CLI 原型、可演示交付 |
 
 ## 共同关注的问题
 AI-native DeFi interaction layer on Monad：
@@ -26,7 +26,7 @@ AI-native DeFi interaction layer on Monad：
 - 撰写 Hackathon 提交材料中的“问题定义 / 竞品分析 / 用户场景”部分
 - 在 Demo 中负责“为什么需要这个产品”的叙事线
 
-## 我在团队中负责什么（Dev / Dev）
+## 我在团队中负责什么（builder / Dev）
 - 维护并扩展 `@themoss/protocol-apriori` adapter（PR #104）
 - 把 `stake-agent.mjs` 升级为 MCP server，支持自然语言调用
 - 补全 `unstake` / `claim` 两条 tool 的端到端验证
