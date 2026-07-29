@@ -34,16 +34,18 @@
   - 不做 Kuru/Perpl 实时订单簿深度聚合
   - 不做 CLOB 市场 sells hook
 
-## AI 帮助完成了什么
+## 团队成员工作成果
 
 ### TiyaDegurechaff（Researcher）
-- 把 Notion `调研 / 五个方向` 与 `mvp建议` 快速整理成 Problem Validation（3 条证据 + 12 个竞品 + 1 个待验证问题）
+- 基于 Notion `调研 / 五个方向` 与 `mvp建议`，整理出 Problem Validation（3 条证据 + 12 个竞品 + 1 个待验证问题）
 - 输出 Problem & Mini Demo Card、Team Formation Card、Brainstorm Meeting 记录
+- 对齐 Hackathon 叙事线：问题定义 / 竞品分析 / 用户场景 / Demo 脚本
 
 ### Eflier（Dev）
-- 辅助梳理 `monad-liq-mvp` 现有代码结构，确认 `LiquidationRouter.sol` 可直接作为 Mini Demo 合约基础
-- 协助生成 Aave/Euler 健康因子监控的 viem 调用思路
-- 帮助编写 README、测试脚本、主网 e2e 验证步骤
+- 梳理 `monad-liq-mvp` 现有代码结构，确认 `LiquidationRouter.sol` 可直接作为 Mini Demo 合约基础
+- 设计 Aave/Euler 健康因子监控的 viem 调用方案
+- 规划 `monad-liq-mvp` Vercel API 的清算交易草稿输出格式
+- 编写 README、测试脚本、主网 e2e 验证步骤
 
 ## 团队进行了哪些检查或修改
 - 对齐 Notion `Monad` 页面结构与本地 `monad-liq-mvp` 代码，确认方向一致
@@ -52,6 +54,7 @@
 - 多次迭代 Week 3 docs：team-formation-card → problem-mini-demo-card → problem-validation → brainstorm-meeting → team-plan
 
 ## 当前遇到的问题
+- Hermes 内建 Notion MCP 工具返回 401（token 无效），但 REST API 正常；需后续排查 Hermes MCP 工具链的 token 传递
 - Kuru/Perpl CLOB SDK 接入尚未验证，Week 4 需要确认是否直接可用
 - 需要主网清算事件数据验证“真实空白”假设
 
