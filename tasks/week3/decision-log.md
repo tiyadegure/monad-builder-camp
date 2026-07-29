@@ -39,7 +39,6 @@
 ### TiyaDegurechaff（Researcher）
 - 把 Notion `调研 / 五个方向` 与 `mvp建议` 快速整理成 Problem Validation（3 条证据 + 12 个竞品 + 1 个待验证问题）
 - 输出 Problem & Mini Demo Card、Team Formation Card、Brainstorm Meeting 记录
-- 生成 Week 3 所有 docs 任务的初稿并多次按反馈调整
 
 ### Eflier（Dev）
 - 辅助梳理 `monad-liq-mvp` 现有代码结构，确认 `LiquidationRouter.sol` 可直接作为 Mini Demo 合约基础
