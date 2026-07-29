@@ -1,7 +1,7 @@
 # Week 3 | 从你的角色验证想法
 
 ## 角色
-Research Builder
+Team（通用验证）
 
 ## 检查结果
 
