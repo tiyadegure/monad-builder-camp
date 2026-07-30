@@ -96,6 +96,7 @@ notes/          ← 课程笔记、技术要点
 - Day 19 Week 4 Hackathon 预演 + 交付形式确认 → `daily/2026-07-24.md`
 - Day 20 Hackathon 启动 + MCP server 路线确定 → `daily/2026-07-27.md`
 - Day 21 MCP server 原型跑通 + Demo 脚本初稿 → `daily/2026-07-28.md`
+- Day 22 Week 3 docs 收尾 + Notion 接入 + 海报提示词 → `daily/2026-07-29.md`
 
 ## Links
 
