@@ -9,6 +9,7 @@ Monad Agent Kit
 |------|------|------|
 | TiyaDegurechaff | Researcher | 协议研究、场景定义、竞品叙事、数据验证 |
 | Eflier | Dev | 合约开发、链上验证、Bot/MCP 原型、可演示交付 |
+| 刘力铭 | Risk & Product | 风险模型、用户侧预警叙事、AI 风险解释、Deleverage 建议 |
 
 ## 共同关注的问题
 Monad 上的实时清算优化与 Agent 可执行 DeFi 层：
