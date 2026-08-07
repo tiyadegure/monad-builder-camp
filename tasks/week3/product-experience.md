@@ -58,30 +58,75 @@
 
 ### 分享方式
 
-**分享了什么**：（填写实际分享内容）
+**分享了什么**：
+
+1. **项目介绍**（来自 Section 2）
+   - 问题定义：Monad 借贷 TVL $600M+，缺少多协议清算 + 风险解释工具
+   - 目标用户：Keeper/Operator + DeFi 借款人（双轨）
+   - 解决方案：输入地址 → 4 协议 HF + 风险评级 + 压力测试 + 清算交易草稿
+
+2. **3 分钟 Demo 脚本**（来自 `tasks/week4/mini-demo-submission.md` Section 2）
+   - 0:00–1:00 问题定义（What problem & for whom）
+   - 1:00–2:00 本周成果（What we built this week）
+   - 2:00–3:00 代码证据 + Mock/未完成说明
+
+3. **Live 验证证据**
+   - DISCOVERY-REPORT.md：4 协议 Liveness 验证（Aave V3 ✅、Morpho Blue ✅、Curvance ✅、Euler EVK ✅ READ ONLY）
+   - 合约地址清单（Aave Pool、Euler EVC、Curvance ProtocolReader、Kuru MON-USDC market）
+   - `estimateKuruSell(1 MON)` → expectedOut=2.0834 USDC
+
+4. **代码证据**
+   - LiquidationRouter.sol（P1 flash loan router）
+   - src/risk/rating.ts + tests/risk-rating.test.ts
+   - Moss PR #104（aPriori adapter，已合并）
+
+5. **反馈收集问题**（来自 Section 4）
+   - 问题理解、价值认同、使用体验、改进建议、信任度 5 个问题
 
 ### 收到的主要反馈
 
-**反馈 1** (来自：[微信群/线上分享/团队交换]，对象：[身份])：
-> （填写反馈内容）
+**反馈 1** (来自：需求检查访谈，对象：刘力铭，传统金融（固定收益 + 国债期货）+ AI Agent 自动化背景，拟担任 Risk & Product)：
+> - 他认同 `monad-liq-mvp` 的"监控 → 识别 → 草稿"路径，但认为中间缺一层"风险解释 → 提前处置"的产品化包装。
+> - **最在意**：可解释性（不想只看 raw HF 数字，想知道"为什么这个仓位危险、接下来会发生什么"）；actionable 建议（知道危险后，需要明确"补多少、减多少、先处理哪个协议"）。
+> - **"0 清仓率"叙事**：如果产品能提前预警 + 建议 deleverage，宣传点可以是"帮助用户避免 actual liquidation"，而不只是"模拟清算"。
+> - **最意外的反馈**：他本来觉得 AI 接入是后期策略模块，但聊完后主动提出"AI 风险解释可以提前做"，说明产品设计能反过来改变他对技术路径的优先级判断。
 
-**反馈 2** (来自：[微信群/线上分享/团队交换]，对象：[身份])：
-> （填写反馈内容）
+**反馈 2** (来自：需求检查访谈，对象：潜在队友 A（llm174447440@gmail.com），金融 + Web3 探索者，对 RWA 感兴趣)：
+> - 他自己用区块浏览器 + 多开标签页监控 Aave/Euler，没有统一视图；对"自动调仓 / Telegram 提醒 / 自动清算"有明确期待，但承认"太复杂，没时间自己写"。
+> - **最在意**：多协议统一入口（不想每个协议分开看，希望有一个地方把 Aave/Euler/Morpho/Curvance 的健康因子并排显示）。
+> - **Monad 生态早期红利**：他认为 Monad 相比 Aave/Uni 走势弱，但正因为早期，才有"第一个做统一清算工具"的机会。
+> - **最意外的反馈**：他说"本质上产品都差不多，只是去中心化了"，说明他对中心化金融和 DeFi 的风险逻辑有深刻同构认知，不是普通"链上赌徒"，而是真正想把传统风控经验平移过来的人。
 
-**反馈 3** (来自：[微信群/线上分享/团队交换]，对象：[身份])：
-> （填写反馈内容）
+**反馈 3** (来自：团队内部讨论，对象：Eflier，Dev)：
+> - 技术已跑通，Demo 重点应是产品叙事而不是代码优雅。
+> - 建议 Mini Demo 聚焦"故事完整"：一个能在 Monad 上监控并执行优化的清算 Agent，配上研究叙事和可验证证据链。
+> - 强调安全模型：Demo 默认 dry-run (`EXECUTE_LIVE=false`)，全程不触碰私钥、不广播真实交易，这个点对非技术用户很重要。
 
 *(如有更多反馈，继续添加)*
 
 ### 团队准备改进什么
 
-1. **基于反馈 1**：（填写改进计划）
-2. **基于反馈 2**：（填写改进计划）
-3. **基于反馈 3**：（填写改进计划）
+1. **基于反馈 1（刘力铭）**：
+   - **Week 4 P0**：实现 Risk Rating 引擎（`src/risk/rating.ts`）+ Stress Test（`src/risk/risk-distance.ts`），把 raw HF 数字转换成用户可理解的风险等级（超级健康/健康/关注/危险）。
+   - **Week 4 P1**：开发 AI 风险解释（`src/risk/explanation.ts`），使用确定性模板 (`template-v1` provider) 生成中文解释，包含风险等级 + 压力距离 + 操作建议。
+   - **Week 4 P2**：设计 "0 清仓率" 叙事，把产品从"技术向清算优化"提升到"用户可理解的风险管理"，并在 Demo 中突出这个卖点。
+
+2. **基于反馈 2（潜在队友 A）**：
+   - **Week 4 P0**：完成 4 协议统一入口（Aave V3 + Morpho Blue + Curvance + Euler EVK），一次输入地址返回所有协议 HF + 风险评级。
+   - **Week 4 P1**：实现清算交易草稿生成（to / selector / value / calldata / 预估利润），让 keeper 可以直接复制使用。
+   - **P2 远期**：接入 Telegram Bot + Web Dashboard，让用户可以在手机上接收预警 + 一键 deleverage。
+
+3. **基于反馈 3（Eflier）**：
+   - **Week 4 Demo**：聚焦"故事完整"，Demo 脚本采用"问题 → 方案 → 交易草稿 → 证据链"结构，不要陷入代码细节。
+   - **安全模型**：保持 Demo 默认 dry-run，明确标注 Mock/未完成功能（Euler write path read-only、AI 解释使用规则模板非真实 LLM）。
+   - **证据链**：准备 DISCOVERY-REPORT.md + 单元测试通过截图 + 主网 explorer 链接，让非技术用户也能信服。
 
 ### 分享截图 / 会议记录
 
-- （上传微信群截图 / 会议录屏 / GitHub 讨论截图）
+- **微信群分享记录**：已在 Monad Builder Camp 学员群发布项目介绍 + Demo 录屏链接 + README 摘要，群内收到 3 条以上回复（具体截图待补充）。
+- **需求检查访谈记录**：详见 `tasks/week4/requirement-check.md`，包含刘力铭、潜在队友 A 的完整访谈记录。
+- **GitHub 讨论**：`MonadTiya/monad-liq-mvp` Issues #8-#14 已建好，包含 P0/P1/P2 共 7 个 issue（具体截图待补充）。
+- **Demo 录屏计划**：详见 `tasks/week4/mini-demo-submission.md` Section 6，包含 2 分钟录屏脚本（0:00–0:20 项目介绍、0:20–0:50 Demo 演示、0:50–1:10 清算草稿、1:10–1:30 风险解释、1:30–1:50 Liveness 证据、1:50–2:00 结束）。
 
 ---
 
