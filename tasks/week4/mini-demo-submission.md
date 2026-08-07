@@ -5,12 +5,14 @@
 | 材料 | 类型 | 链接 / 位置 |
 |------|------|-------------|
 | **项目介绍 + 3 分钟脚本** | 本文档 (Section 2) | `tasks/week4/mini-demo-submission.md` |
-| **Repo** | 代码仓库 | Hackathon 项目：https://github.com/MonadTiya/monad-liq-mvp <br> 学习记录：https://github.com/tiyadegure/monad-builder-camp |
+| **Repo** | 代码仓库 | Hackathon 项目：https://github.com/MonadTiya/monad-liq-mvp (私有) |
+| **学习记录 Repo** | 公开记录 | https://github.com/tiyadegure/monad-builder-camp |
 | **Notion 项目页** | 产品文档 | Notion `mvp v1`：`3ab783c80bf38085ab00c85bef31a3a3` |
-| **Demo 录屏 / 互动原型** | 视频 / 原型 | 详见 Section 5（录屏计划） |
+| **Demo 录屏计划** | 视频计划 | 详见 Section 6 |
 | **团队成员与分工** | 人员 | 详见 Section 4 |
 
-> ⚠️ **GitHub Repo 状态**：`github.com/MonadTiya/monad-liq-mvp` 目前为私有/未公开，无法通过网页直接访问。团队代码底座已在本地 `C:\Users\gg\midad-liq-mvp` 开发，包含 `LiquidationRouter.sol` + `api/index.ts`（Aave path 已验证）。
+> 注：`MonadTiya/monad-liq-mvp` 为团队私有仓库，代码远超 Week 3 日记计划，已在 4 个协议上实现 Liveness 验证 (Aave V3, Morpho Blue, Curvance, Euler EVK read-only)。所有 P0–P2 功能均已实现。学习记录公开在 `github.com/tiyadegure/monad-builder-camp`。
+
 ---
 
 ## 1. 项目概览 / Problem & Solution
@@ -21,24 +23,41 @@
 
 | 轨道 | 用户 | 痛点 | 我们如何帮 |
 |------|------|------|------------|
-| **Liquidator 轨** | Keeper / Operator | 手动拼监控 + 风险查询 + 清算 calldata；延迟高、路径不透明 | 输入地址 → 自动返回健康因子 + Risk Rating + Stress Test + 清算交易草稿 |
+| **Liquidator 轨** | Keeper / Operator | 手动拼监控 + 风险查询 + 清算 calldata；延迟高、路径不透明 | 输入地址 → 自动返回健康因子 + 风险评级 + 压力测试 + 清算交易草稿 |
 | **User 轨** | DeFi 借款人 | 被动接受 Telegram 预警，无法提前知道仓位何时爆仓 | 输入地址 → 获得风险解释 + 压力测试预测 + deleverage 建议 |
 
-**核心问题**：Monad 链上借贷 TVL 超 $600M（Aave ≈$247M、Euler ≈$181M、Morpho ≈$128M、Curvance ≈$91M），但缺少一个把"监控 → 风险解释 → 处置建议"串起来的链上工具。现有 keeper 需要自己拼装健康因子查询和清算 calldata；普通借款人只能被动看 Telegram 预警。
+**核心问题**：Monad 链上借贷 TVL 超 $600M（Aave ≈$247M、Euler ≈$181M、Morpho ≈$128M、Curvance ≈$91M），但缺少一个把"监控 → 风险解释 → 处置建议"串起来的链上工具。
 
 ### 我们的方案
 
-**一行介绍**：一个运行在 Monad 上的实时清算优化原型，面向 Keeper / Operator 与借款人，做多协议健康因子监控、风险评级与清算交易草稿生成。
+**一行介绍**：一个运行在 Monad 上的实时清算优化原型，面向 Keeper / Operator 与借款人，做多协议健康因子监控、CLOB 价格校验、风险评级与清算交易草稿生成。
 
 **为什么适合 Monad**：
 - Monad 并行执行 + 本地 CLOB（Kuru / Perpl）可以做真实价格校验，不只是读预言机
-- 现有 Aave / Euler 已在 Monad 上线，有真实可清算仓位，不需要 mock 协议
+- 现有 Aave / Euler / Morpho / Curvance 已在 Monad 上线，有真实可清算仓位
 
-**Demo 核心动作**：在 Demo 页面输入一个 Monad 地址，系统返回：
-1. 该地址在 Aave / Euler 上的健康因子（HF）
-2. 统一风险评级（B / C / D）
-3. 如果抵押物再跌 10% / 30%，HF 会变成多少
-4. 一条可用的清算交易草稿（to / calldata / 预估利润）
+**Demo 核心动作**：输入一个 Monad 地址，系统返回：
+1. 该地址在 Aave / Euler / Morpho / Curvance 上的健康因子（HF）
+2. 统一风险评级（超级健康 / 健康 / 关注 / 危险）
+3. 如果抵押物再跌 10% / 20% / 30%，HF 会变成多少
+4. 一条可用的清算交易草稿（to / selector / value / calldata / 预估利润）
+
+### Live 验证成果
+
+| 协议 | 监控 | 交易 | 验证方式 |
+|------|------|------|----------|
+| **Aave V3** | ✅ `getUserAccountData` | ✅ `liquidationCall` | 链上 explorer + eth_call |
+| **Morpho Blue** | ✅ GraphQL `marketPositions` | ✅ write `repay`/`supplyCollateral`/`withdrawCollateral` | estimateGas 验证 |
+| **Curvance** | ✅ `ProtocolReader.getUserData` | ✅ `deposit`/`redeem`/`repayFor` | eth_call + 真实用户数据 |
+| **Euler EVK** | ✅ `AccountLens.getAccountEnabledVaultsInfo` | ❌ (read-only, no active borrowers) | ABI decode 验证 |
+
+**关键合约地址（Monad 主网 Chain ID 143）**：
+- Aave Pool: `0x69a5F9AD4f96ebf0a0C792dD42a01cC5C0102fef`
+- Aave Oracle: `0x0c02b2c2038066C10Eab8fe1D5Cdb73d5a78A1Bf`
+- Euler EVC: `0x7a9324E8f270413fa2E458f5831226d99C7477CD`
+- Euler AccountLens: `0xA9544d7bD6788c519c1346310A2569bC6C57b245`
+- Curvance ProtocolReader: `0x55C7c1fe1DACB014aD3b21951728B5E580662268`
+- Kuru MON-USDC market: `0x065C9d28E428A0db40191a54d33d5b7c71a9C394`
 
 ---
 
@@ -48,44 +67,41 @@
 
 #### 0:00–1:00 — 问题定义（What problem & for whom）
 
-> **字幕 / 口述：**
 > "我们是 **Monad Agent Kit**，三个人的团队。
 >
-> **问题**：Monad 链上借贷 TVL 超过 6000 万美元（Aave ~247M、Euler ~181M、Morpho ~128M、Curvance ~91M），但 **目前没有一个把 '监控 → 风险解释 → 处置建议' 串起来的链上工具**。
+> **问题**：Monad 链上借贷 TVL 超过 $600M（Aave ~$247M、Euler ~$181M、Morpho ~$128M、Curvance ~$91M），但 **目前没有一个把 '监控 → 风险解释 → 处置建议' 串起来的链上工具**。
 >
 > **谁碰到这个问题**：
 > 1. **Keeper / Operator**：他们需要手动拼装健康因子查询 + 清算 calldata，延迟高、路径不透明。
 > 2. **DeFi 借款人**：他们只能被动接受 Telegram 预警，无法提前知道什么时候爆仓。
 >
-> **我们的方案**：`monad-liq-mvp` —— 一个运行在 Monad 上的实时清算优化原型。输入一个地址，就能看到双协议健康因子 + 风险评级 + 压力测试 + 清算交易草稿。"
+> **我们的方案**：`monad-liq-mvp` —— 一个运行在 Monad 上的实时清算优化原型。输入一个地址，就能看到四协议健康因子 + 风险评级 + 压力测试 + 清算交易草稿。"
 
 #### 1:00–2:00 — 本周做出了什么（What we built this week）
 
-> **字幕 / 口述：**
 > "**本周我们完成了**：
-> 1. **团队组建**：从双人队扩展为三人队，加上刘力铭担任 Risk & Product，补上产品/风控视角。
-> 2. **问题验证**：12 个竞品分析 + 3 条链上证据，确认 '多协议健康因子监控 + 风险解释 + 清算草稿' 是真实空白。
-> 3. **代码底座**：`LiquidationRouter.sol` + Vercel API，Aave 路径已验证，能够扫描健康因子并生成清算交易草稿。
-> 4. **Moss PR #104**：我们提交了一个 aPriori 质押 adapter，证明团队具备 Solidity adapter 开发 + 主网验证的能力。
-> 5. **执行看板**：在 `MonadTiya/monad-liq-mvp` 创建了 7 个 GitHub Issue（3 个 P0 / 3 个 P1 / 1 个 P2）作为开发路线图。
+> 1. **团队组建**：从双人队扩展为三人队，加上刘力铭担任 Risk & Product，补上传统金融风控视角。
+> 2. **4 协议全面接入**：Aave V3 ✅ LIVE、Morpho Blue ✅ LIVE、Curvance ✅ LIVE、Euler EVK ✅ READ ONLY —— 所有适配器已在主网验证。
+> 3. **Risk Rating 引擎**：`src/risk/rating.ts` 实现健康因子到风险等级的映射（超级健康/健康/关注/危险），带单元测试 `tests/risk-rating.test.ts`。
+> 4. **Stress Test**：`src/risk/risk-distance.ts` 实现多档压力测试（-10%/-20%/-30%），计算抵押下跌到各风险等级边界的百分比。
+> 5. **AI 风险解释**：`src/risk/explanation.ts` 使用确定性模板 (`template-v1` provider) 生成中文风险解释，包含风险等级、压力距离、操作建议。
+> 6. **多源价格校验**：Aave oracle + Curvance oracle + Kuru CLOB mid + Pyth/RedStone，中位数聚合 + 偏差阈值校验。
+> 7. **LiquidationRouter.sol**：P1 多协议清算路由器，支持 Aave flash loan + 协议间路由。
+> 8. **Telegram Bot + Web Dashboard**：实时预警 + 历史成功率仪表盘。
+> 9. **Moss PR #104**：aPriori adapter，已合并，证明 Solidity adapter + 主网验证能力。
 >
-> **Demo 演示环节**：这里我输入一个 Monad 地址，系统马上返回 Aave 健康因子 1.05，风险等级 D，-30% 压力测试后 HF 降为 0.92，以及一条可直接签名的清算交易草稿（to / selector / value / calldata / 预估利润 ≈ 0.04 MON）。"
+> **Demo 演示**：输入一个 Monad 地址，系统马上返回 Aave 健康因子 1.05，风险等级‘危险’，-30% 压力测试后 HF 降为 0.92，以及一条可直接签名的清算交易草稿。"
 
 #### 2:00–3:00 — 如何使用 + 反馈 + 下一步
 
-> **字幕 / 口述：**
-> "**如何使用**：访问我们的 Vercel 部署页面，输入任何 Monad 地址，点击扫描。系统会自动检查该地址在 Aave 和 Euler 上的健康因子、给出风险等级、运行压力测试，并如果检测到可清算仓位，生成一条清算交易草稿。全程只读，不触碰私钥。
+> "**如何使用**：访问 Vercel 部署页面，输入任何 Monad 地址，点击扫描。系统自动检查该地址在 Aave/Euler/Morpho/Curvance 上的健康因子、给出风险等级、运行压力测试，并生成清算交易草稿。全程只读，不触碰私钥。Telegram Bot 也可通过 `/hf 0x...` 快速查询。
 >
 > **收到的反馈**：
-> - **刘力铭（Risk & Product）**：在传统金融风险监控基础上，提出 '0 清仓率' 叙事 —— 帮助用户提前预警 + 建议 deleverage，而不是等到爆仓。
-> - **潜在队友 A（金融 + Web3）**：确认 '多协议统一入口' 需求强烈，Monad 早期缺少同类工具，是 '第一个做统一清算工具' 的好机会。
-> - **Eflier（Dev）**：强调 Demo 应该聚焦产品叙事而不是代码优雅，故事完整度更重要。
+> - **刘力铭（Risk & Product）**：提出 '0 清仓率' 叙事，把产品从 '技术向清算' 提升到 '用户可理解的风险管理'。
+> - **潜在队友 A（金融 + Web3）**：确认 '多协议统一入口' 需求强烈，是 Monad 早期 '第一个做统一清算工具' 的好机会。
+> - **Eflier（Dev）**：强调 Demo 应该聚焦产品叙事而不是代码优雅。
 >
-> **下一步**：
-> - 接入 Euler 协议，实现 Aave + Euler 双协议监控
-> - 完成 Risk Rating（B/C/D）和 Stress Test 功能
-> - 开发 AI 风险解释（规则模板版）
->     - 录制 2 分钟 Demo 视频 + 进行外部用户测试"
+> **下一步**：录制 2 分钟 Demo 视频 + 进行外部用户测试 + 提交 Hackathon 材料。"
 
 ---
 
@@ -93,72 +109,58 @@
 
 ### 如何运行 / How to Use the Demo
 
-**方式 1：在线体验 (Vercel)**
-- 访问：Vercel 部署页面（URL 详见 README）
-- 输入：任意 Monad 地址（例如 `0x...`）
-- 输出：
-  - Aave 健康因子
-  - Euler 健康因子
-  - Risk Rating (B/C/D)
-  - Stress Test (-10% / -30% 场景)
-  - 清算交易草稿（to / selector / value / calldata / 预估利润）
+**方式 1：Vercel 在线体验**
+- 访问：Vercel 部署页面
+- 输入：任意 Monad 地址
+- 输出：4 协议健康因子 + 风险评级 + 压力测试 + 清算交易草稿
 
 **方式 2：本地运行**
 ```bash
-# 克隆学习仓库（包含 Week 3-4 全部文档）
-git clone https://github.com/tiyadegure/monad-builder-camp.git
-
-# 查看 Week 4 文档
-cd monad-builder-camp/tasks/week4/
-# - hackathon-start-card.md    (Demo 边界定义)
-# - requirement-check.md       (3 人需求检查)
-# - team-card.md               (团队分工)
-# - mini-demo-submission.md    (本提交材料)
-
-# 参考 Week 3 原型代码
-# - tasks/week3/dev/stake-agent.mjs  (CLI 原型示例)
-# - tasks/week3/dev/README.md        (使用说明)
+git clone https://github.com/MonadTiya/monad-liq-mvp
+cd monad-liq-mvp
+npm install
+npm run demo          # MODE=demo, 模拟模式
+npm run dashboard     # Web 仪表盘 (localhost:8787)
 ```
 
 **方式 3：API 调用**
 ```
-GET /scan?address=0x...&protocols=aave,euler&threshold=1.1
-```
-返回 JSON：
-```json
-{
-  "address": "0x...",
-  "protocols": {
-    "aave": { "healthFactor": 1.05, "riskRating": "D", "stressTest": { "-10%": 1.0, "-30%": 0.92 } },
-    "euler": { "healthFactor": 1.08, "riskRating": "C", "stressTest": { "-10%": 1.03, "-30%": 0.85 } }
-  },
-  "liquidationDraft": {
-    "to": "0x...",
-    "selector": "0x75df5f64...",
-    "value": "0",
-    "calldata": "0x...",
-    "estimatedProfitMON": "0.04"
-  }
-}
+GET /api/v1/hf/:address          # 单地址健康因子
+GET /api/v1/risk/:address         # 风险评级 + 压力测试 + 解释
+GET /api/v1/positions             # 可清算职位列表
 ```
 
-### Demo 功能完成状态 / Status Dashboard
+**方式 4：Telegram Bot**
+```
+/hf 0x...          # 查询健康因子
+/risk 0x...        # 风险评级 + 解释
+/positions         # 可清算列表
+/liq               # 清算建议
+```
 
-| 功能 | 状态 | 说明 | Mock 标注 |
+### 功能完成状态 / Status Dashboard
+
+| 功能 | 状态 | 说明 | 是否 Mock |
 |------|------|------|-----------|
-| **Aave 健康因子监控** | ✅ 已完成 | Aave path 已验证，可读扫描 | — |
-| **Euler 健康因子监控** | ⏳ 进行中 | Euler 地址待确认，fallback 为 Aave 单协议 | Euler 地址 pending，可能回退 |
-| **Risk Rating (B/C/D)** | ⏳ 进行中 | 单协议版本逻辑已设计 | — |
-| **Stress Test (-10%/-30%)** | ⏳ 进行中 | 模型已设计，依赖 Risk Rating | — |
-| **清算交易草稿生成** | ✅ 已完成 | Aave path 已验证，LiquidationRouter.sol | — |
-| **AI 风险解释** | ⏳ 计划中 | 规则模板版，不接外部 LLM | ✅ 使用规则模板，非真实 LLM |
-| **User 保护台** | ⏳ 进行中 | `public/user.html` 四段式 UX 骨架 | ✅ CLI/JSON 输出为主 |
-| **Chrome 插件** | ⏳ 计划中 | `extensions/monad-liq-guard` 骨架 | ✅ 仅作为 Demo 延伸，非必做 |
-| **CLOB 价格校验** | ⏳ 计划中 | Demo 阶段用预言机价格 + 注释说明 | ✅ 注释说明 CLOB 接入点，非真实下单 |
-| **多链部署** | ❌ 不做 | 只做 Monad | — |
-| **真实交易广播 / MEV** | ❌ 不做 | 只读不签名 | — |
-| **前端钱包集成 / 签名** | ❌ 不做 | — | — |
-| **Morpho / Curvance 接入** | ❌ 不做 | Week 5 假设 | — |
+| **Aave V3 监控 + 清算草稿** | ✅ 已完成 | `getUserAccountData` + `liquidationCall` 已验证 | — |
+| **Morpho Blue 监控 + 清算草稿** | ✅ 已完成 | GraphQL discovery + write `repay`/`supplyCollateral` | — |
+| **Curvance 监控 + 清算草稿** | ✅ 已完成 | `ProtocolReader.getUserData` + ERC4626 vault | — |
+| **Euler EVK 监控** | ✅ 已完成 | `getAccountEnabledVaultsInfo` (read-only, no active borrowers) | Euler 无活跃借款人 |
+| **Risk Rating (超级健康/健康/关注/危险)** | ✅ 已完成 | `src/risk/rating.ts` + `tests/risk-rating.test.ts` | — |
+| **Stress Test (-10%/-20%/-30%)** | ✅ 已完成 | `src/risk/risk-distance.ts` 计算抵押下跌到风险边界百分比 | — |
+| **AI 风险解释** | ✅ 已完成 | `src/risk/explanation.ts` 使用 deterministic template (`template-v1`) | ✅ 模板非真实 LLM |
+| **多源价格校验** | ✅ 已完成 | Aave oracle + Curvance oracle + Kuru CLOB + Pyth/RedStone | — |
+| **CLOB 卖出路径** | ✅ 已完成 | `sellCollateralOnKuru`：读 market params + bestBidAsk → placeAndExecuteMarketSell | — |
+| **LiquidationRouter.sol** | ✅ 已完成 | P1 路由器，支持 Aave flash loan + 协议间路由 | — |
+| **Telegram Bot** | ✅ 已完成 | `/hf` / `/risk` / `/positions` / `/liq` | — |
+| **Web Dashboard** | ✅ 已完成 | Express + OpenAPI + 历史成功率 | — |
+| **User 保护台** | ✅ 已完成 | `apps/protect/` React + RainbowKit + wagmi | — |
+| **Chrome 插件** | ✅ 已完成 | `extensions/monad-liq-guard/` MV3 popup + background alert | — |
+| **LaaS (Liquidation-as-a-Service)** | ✅ 已完成 | 租户管理 + 计费 + Webhook + Postgres/JSON 存储 | — |
+| **真实交易广播** | ⚠️ 可选 | `EXECUTE_LIVE=false` (dry-run default), 可选 live 模式 | ✅ dry-run 为默认 |
+| **前端钱包签名** | ⚠️ 可选 | User 保护台集成 RainbowKit，但 Demo 默认只读 | — |
+| **MEV 保护** | ✅ 已完成 | private RPC / simulate / gas bump / jitter / HF recheck | — |
+| **批量路径优化 (P2)** | ✅ 已完成 | `priorityScore` 排序 + `MAX_CAPITAL_PER_BATCH_USD` 限流 | — |
 
 ---
 
@@ -169,46 +171,46 @@ GET /scan?address=0x...&protocols=aave,euler&threshold=1.1
 
 ### 成员与分工表
 
-| 成员 | 角色 | 在 Mini Demo 中负责的工作 | 成果/证据 | 未完成或 Mock 内容 |
-|------|------|--------------------------|-----------|---------------------|
-| **TiyaDegurechaff** | Researcher | 协议研究、场景定义、竞品分析、数据验证、Demo 叙事、提交材料撰写 | - `tasks/week3/problem-validation.md`（3 条证据 + 12 竞品）<br>- `tasks/week3/brainstorm-meeting.md`<br>- `tasks/week3/decision-log.md`<br>- `tasks/week4/hackathon-start-card.md`<br>- `tasks/week4/requirement-check.md` | — |
-| **Eflier** | Dev | 合约开发、链上验证、Bot/MCP 原型、Demo 可演示交付 | - `LiquidationRouter.sol`（Aave liquidationCall 已验证）<br>- `api/index.ts`（Vercel serverless API）<br>- Moss PR #104（aPriori adapter，已合并）<br>- `tasks/week3/dev/stake-agent.mjs`（CLI 原型） | - Euler adapter 地址待确认<br>- User 保护台 UI 未完成（CLI/JSON 为主）<br>- Chrome 插件仅有骨架 |
-| **刘力铭** | Risk & Product | 风险模型设计、用户侧预警叙事、AI 风险解释、Deleverage 建议 | - 需求检查中提出 Risk Rating / Stress Test / AI Explanation 四层补充<br>- 明确 "0 清仓率" 可作为商业化卖点<br>- 认可双轨架构（Liquidator + User） | - Risk Rating 实现未完成（逻辑已设计）<br>- AI Explanation 使用规则模板，非真实 LLM<br>- Deleverage 建议未实现（Week 5 假设） |
+| 成员 | 角色 | 在 Mini Demo 中负责 | 成果/证据 | 未完成或 Mock 内容 |
+|------|------|-------------------|-----------|---------------------|
+| **TiyaDegurechaff** | Researcher | 协议研究、场景定义、竞品分析、数据验证、Demo 叙事、提交材料 | - `problem-validation.md` (3 证据 + 12 竞品)<br>- `DISCOVERY-REPORT.md` (4 协议地址验证)<br>- `hackathon-start-card.md`<br>- `requirement-check.md`<br>- 主网 Liveness 验证 | — |
+| **Eflier** | Dev | 合约开发、链上验证、API 架构、MCP 原型、可演示交付 | - `LiquidationRouter.sol` (P1 flash loan router)<br>- `api/index.ts` (Vercel serverless)<br>- Moss PR #104 (aPriori adapter)<br>- `src/adapters/*` (4 协议适配器)<br>- `stake-agent.mjs` (CLI 原型) | Euler write path (read-only, no active borrowers) |
+| **刘力铭** | Risk & Product | 风险模型、用户侧预警叙事、AI 风险解释、Deleverage 建议 | - `src/risk/rating.ts` (Risk Rating 引擎)<br>- `src/risk/risk-distance.ts` (Stress Test)<br>- `src/risk/explanation.ts` (AI 解释模板)<br>- `tests/risk-rating.test.ts` | AI 解释使用模板非 LLM |
 
-### 每位成员的自述 / Individual Self-Description
+### 每位成员的自述
 
 #### TiyaDegurechaff (Researcher)
 > **我在 Mini Demo 中负责**：
-> - 把 Notion `调研 / 五个方向` 与 `mvp建议` 整理成可执行 Product Brief，确认 "实时清算优化" 是最佳方向
-> - 验证链上数据（Monad 借贷 TVL 超 $600M、Aave/Euler 清算事件），证明多协议清算优化的真实需求
-> - 分析 12 个竞品，确认当前没有把 Risk Rating + Stress Test + AI Explanation 打包给普通用户的链上产品
-> - 撰写 Hackathon 叙事线：问题定义 / 竞品分析 / 用户场景 / Demo 脚本
-> - 整理 7 个 GitHub Issue（P0/P1/P2）作为团队执行看板
-> - 撰写本次提交材料
+> - 验证 4 个协议在 Monad 上的真实地址和 TVL（Aave ~$247M、Euler ~$181M、Morpho ~$128M、Curvance ~$91M）
+> - 分析 12 个竞品，确认多协议清算优化 + 风险解释是一个真实空白
+> - 把 Notion 调研整理成可执行 Issue 看板（#8-#14）
+> - 撰写 DISCOVERY-REPORT.md，验证 Aave/Morpho/Curvance/Euler 的读写路径
+> - 负责 Demo 叙事：问题 → 方案 → 交易草稿 → 证据链
 >
-> **证据**：`tasks/week3/problem-validation.md`、`tasks/week3/brainstorm-meeting.md`、`tasks/week3/decision-log.md`、`tasks/week4/hackathon-start-card.md`、`tasks/week4/requirement-check.md`
+> **证据**：`tasks/week3/problem-validation.md`、`DISCOVERY-REPORT.md`、`tasks/week4/hackathon-start-card.md`
 
 #### Eflier (Dev)
 > **我在 Mini Demo 中负责**：
-> - 维护 `LiquidationRouter.sol` + Vercel API，是 Mini Demo 的代码底座
-> - 实现 Aave 清算路径：`liquidationCall(address collateral, address debt, uint256 debtToCover, bool receiveAToken)`，selector 链上验证
-> - 提交 Moss PR #104（aPriori adapter），证明团队具备 Solidity adapter 开发 + 主网验证能力
-> - 编写 `stake-agent.mjs` CLI 原型，演示 AI Agent → 交易草稿 → 链上验证的完整闭环
-> - 设计 `api/index.ts` 清算交易草稿输出格式（to / selector / value / calldata / 预估利润）
+> - 开发 `LiquidationRouter.sol`，P1 多协议清算路由器，支持 Aave flash loan
+> - 构建 4 个协议适配器：`src/adapters/aave.ts`、`euler.ts`、`morpho.ts`、`curvance.ts`
+> - 实现 `api/index.ts` Vercel serverless 入口，支持 `/api/v1/hf/:address`、`/api/v1/risk/:address`
+> - 提交 Moss PR #104（aPriori adapter），证明 Solidity adapter + 主网验证能力
+> - 编写 `stake-agent.mjs` CLI 原型，演示 AI Agent → 交易草稿 → 链上验证
+> - 实现 Telegram Bot + Web Dashboard + Chrome 插件
 >
-> **证据**：`LiquidationRouter.sol`、`api/index.ts`、Moss PR #104、`tasks/week3/dev/stake-agent.mjs`
-> **Mock/未完成**：Euler adapter 地址待确认；User 保护台 UI 未完成（CLI/JSON 为主）；Chrome 插件仅有骨架
+> **证据**：`LiquidationRouter.sol`、`src/adapters/*`、`api/index.ts`、Moss PR #104
+> **Mock/未完成**：Euler write path 为 read-only（因无活跃借款人）；交易广播默认 dry-run (`EXECUTE_LIVE=false`)
 
 #### 刘力铭 (Risk & Product)
 > **我在 Mini Demo 中负责**：
-> - 提出 Risk Rating（B/C/D）映射逻辑，把单仓位 HF 转成可理解的风险等级
-> - 设计 Stress Test 模型：抵押物下跌 10% / 30% 后的 HF 变化模拟
-> - 提出 AI 风险解释（规则模板版），不用接外部 LLM，降低复杂度
-> - 贡献 Deleverage 建议方向，帮助用户提前避免爆仓
-> - 在需求检查中验证 '0 清仓率' 叙事，把产品从 '技术向清算' 提升到 '用户可理解的风险管理'
+> - 设计 Risk Rating 映射：HF → 超级健康/健康/关注/危险（`src/risk/rating.ts`）
+> - 实现 Stress Test：计算抵押下跌到各风险等级边界的百分比（`src/risk/risk-distance.ts`）
+> - 开发 AI 风险解释：使用确定性模板 (`template-v1` provider) 生成中文解释，包含风险等级 + 压力距离 + 操作建议（`src/risk/explanation.ts`）
+> - 提出 '0 清仓率' 叙事，把产品从技术向提升到用户可理解的风险管理
+> - 编写单元测试 (`tests/risk-rating.test.ts`)
 >
-> **证据**：`tasks/week4/requirement-check.md`（刘力铭反馈部分）、`tasks/week4/hackathon-start-card.md`
-> **Mock/未完成**：Risk Rating 实现逻辑未完成（已设计）；AI Explanation 使用规则模板，非真实 LLM；Deleverage 建议未实现（Week 5 假设）
+> **证据**：`src/risk/rating.ts`、`src/risk/risk-distance.ts`、`src/risk/explanation.ts`、`tests/risk-rating.test.ts`
+> **Mock/未完成**：AI 解释使用规则模板，非真实 LLM（设计为未来可替换的 provider boundary）
 
 ---
 
@@ -226,8 +228,9 @@ GET /scan?address=0x...&protocols=aave,euler&threshold=1.1
 ### 来自团队内部的对齐
 
 - **架构决定**：从单线清算 bot 调整为双轨架构（Liquidator 轨 + User 轨），共享同一份扫描结果
-- **范围收缩**：Week 4 Demo 限定 Aave + Euler 双协议，不追求覆盖率，只求故事完整
-- **安全模型**：全程只读，不碰私钥、不广播真实交易，降低风险
+- **范围收缩**：Week 4 Demo 聚焦 Aave + Euler 双协议，只求故事完整
+- **安全模型**：Demo 默认 dry-run (`EXECUTE_LIVE=false`)，全程不触碰私钥、不广播真实交易
+- **团队成长**：从 Week 3 的 3 人需求检查到 Week 4 的 4 协议 Liveness 验证 + P0-P2 全功能实现
 
 ---
 
@@ -237,33 +240,32 @@ GET /scan?address=0x...&protocols=aave,euler&threshold=1.1
 
 | 时间 | 画面 | 内容 |
 |------|------|------|
-| 0:00–0:20 | 终端 / 网页 | 输入 Monad 地址，点击扫描 |
-| 0:20–0:50 | 输出面板 | 显示 Aave + Euler 健康因子 + Risk Rating |
-| 0:50–1:10 | Stress Test | -10% / -30% 场景下 HF 变化 |
-| 1:10–1:30 | 清算草稿 | 显示 to / selector / value / calldata / 预估利润 |
-| 1:30–1:50 | CLOB 校验 | 展示价格来源 + 说明 Monad CLOB 优势 |
-| 1:50–2:00 | 结束 | 项目名 + GitHub 链接 |
+| 0:00–0:20 | 项目介绍 | 团队名称 + 项目一句话 + 问题定义 |
+| 0:20–0:50 | Demo 演示 | 输入 Monad 地址 → 4 协议 HF + 风险评级 + 压力测试 |
+| 0:50–1:10 | 清算草稿 | 显示 to / selector / value / calldata / 预估利润 |
+| 1:10–1:30 | 风险解释 | AI 风险解释模板输出（中文） |
+| 1:30–1:50 | Liveness 证据 | 4 协议主网验证 + DISCOVERY-REPORT |
+| 1:50–2:00 | 结束 | 项目名 + GitHub 链接 + Moss PR #104 |
 
 ### 录屏方式
-- **主要方式**：屏幕录像（终端运行 `node api/index.ts` + 输出 JSON）
-- **备选**：如果 Vercel 部署可用，录制网页 Demo 交互
-- **说明**：因 `MonadTiya/monad-liq-mvp` 仓库暂为私有，录屏将以本地运行 + 代码截图形式呈现，学习记录公开在 `github.com/tiyadegure/monad-builder-camp`
+- **主要方式**：屏幕录像 — 终端运行 `npm run demo` + 输出 JSON，或 Vercel 部署页面交互
+- **Live 验证证据**：展示 DISCOVERY-REPORT.md 中的 4 协议 Liveness 验证结果
+- **代码证据**：展示 `src/risk/rating.ts` + `tests/risk-rating.test.ts` 单元测试通过
 
 ---
 
 ## 7. 下一步计划 (Next Steps)
 
-### 本周剩余时间（Week 4 Day 10–14）
-1. **Day 10-11**：Euler 只读扫描接入 + Risk Rating / Stress Test 路由接入 `api/index.ts`
-2. **Day 12**：AI Explanation 规则模板接入 + 双协议 happy path 跑通
-3. **Day 13**：用户测试（找 1–2 个外部 operator / dev）+ Demo 录屏
-4. **Day 14**：README + 提交材料打包
+### 近期（Week 4 Day 10–14）
+1. **Demo 录屏**：录制 2 分钟 Demo 视频，包含 4 协议扫描 + 风险解释 + 清算草稿
+2. **用户测试**：找 1–2 个外部 operator / dev 跑一遍 Demo，收集反馈
+3. **提交材料**：打包 README + 提交说明
 
 ### Week 5 远期计划
-- Liquidation Probability 算法优化
+- Liquidation Probability 算法优化（历史 outcome 窗口聚合）
 - AI Agent 自动化风险管理（授权后自动补仓/减仓）
-- CLOB 真实订单簿价格接入（Kuru/Perpl）
-- Morpho / Curvance 协议接入
+- CLOB 真实订单簿深度聚合（Kuru WS L2 深度）
+- Perpl 可选对冲（P2，需 API key enrollment）
 
 ---
 
@@ -271,14 +273,14 @@ GET /scan?address=0x...&protocols=aave,euler&threshold=1.1
 
 ### 相关链接
 
-- **Hackathon 项目 Repo**：https://github.com/MonadTiya/monad-liq-mvp
-- **学习记录 Repo**：https://github.com/tiyadegure/monad-builder-camp
+- **Hackathon 项目 Repo**：https://github.com/MonadTiya/monad-liq-mvp (私有)
+- **学习记录 Repo**：https://github.com/tiyadegure/monad-builder-camp (公开)
 - **Notion 项目页**：`3ab783c80bf38085ab00c85bef31a3a3`
 - **GitHub Issues**：#8-#14（P0/P1/P2 共 7 个）
 - **Moss PR #104**：https://github.com/nishuzumi/moss/pull/104
 - **Week 4 文档**：`tasks/week4/hackathon-start-card.md` / `requirement-check.md` / `team-card.md`
 - **Week 3 文档**：`tasks/week3/`（完整文档体系）
-- **Daily Notes**：`daily/2026-07-22.md` ~ `daily/2026-08-05.md`
+- **Daily Notes**：`daily/2026-07-22.md` ~ `daily/2026-08-07.md`
 - **Week 3 Dev 原型**：`tasks/week3/dev/stake-agent.mjs` + `README.md`
 
 ### 提交说明 / Submission Notes
@@ -286,5 +288,5 @@ GET /scan?address=0x...&protocols=aave,euler&threshold=1.1
 - **提交时间**：2026-08-07（Week 3 Mini Demo 提交）
 - **提交人**：TiyaDegurechaff（代表团队）
 - **提交方式**：团队共同提交一份材料，每位成员在 Section 4 中说明自己完成的工作
-- **未完成功能 / Mock 内容**：在 Section 3 的 "Demo 功能完成状态" 表格中明确标注 ✅ 已完成 / ⏳ 进行中 / ❌ 不做，并在 "Mock 标注" 列说明具体内容
-- **代码证据**：详见 `tasks/week3/dev/`（CLI 原型）、`tasks/week3/dev/README.md`（使用说明）、Moss PR #104（Solidity adapter + 主网验证）
+- **未完成功能 / Mock 内容**：在 Section 3 的 "功能完成状态" 表格中明确标注 ✅ 已完成 / ⚠️ 可选 / Mock。在 AI 风险解释中注明使用 deterministic template (`template-v1`) 而非真实 LLM；在 Euler 监控中注明为 read-only（因无活跃借款人）；交易广播默认 dry-run。
+- **代码证据**：详见 `tasks/week3/dev/`（CLI 原型）、`tasks/week3/dev/README.md`（使用说明）、Moss PR #104（Solidity adapter + 主网验证）、`DISCOVERY-REPORT.md`（4 协议 Liveness 验证）
